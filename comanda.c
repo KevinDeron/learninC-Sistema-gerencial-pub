@@ -62,7 +62,7 @@ void adicionarItemComanda(struct comanda *comanda, int quant, struct item *novoI
     }
     if(comanda->quantidadeItens >= 10){
         printf("Comanda %s(%s) | Numero de itens excedido(%d)\n",
-            comanda->cliente ,comanda->mesa, comanda->quantidadeItens);
+            comanda->mesa ,comanda->cliente, comanda->quantidadeItens);
         return;
     }
     for(int i = 0;i < comanda->quantidadeItens; i++){
@@ -125,7 +125,7 @@ int renomearComanda(struct comanda *comanda, char *novoNomeMesa, char *novoNomeC
     if(strlen(novoNomeMesa) <= 14 && strlen(novoNomeCliente) <= 14){
         strcpy(comanda->mesa, novoNomeMesa);
         strcpy(comanda->cliente, novoNomeCliente);
-        printf("Comanda renomeada para %s(%s)\n",comanda->cliente, comanda->mesa);
+        printf("Comanda renomeada para %s(%s)\n",comanda->mesa, comanda->cliente);
         return 1;
     }
     printf("Nome maior que %zu(-1) caracteres!\n", sizeof(comanda->cliente));

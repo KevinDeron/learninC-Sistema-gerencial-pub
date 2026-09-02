@@ -9,13 +9,13 @@ void imprime(){
     for(int j = 0;j < totalComandas;j++){
         if(!comandas[j].isLivre){
             printf("Comanda: %s(%s)\nLivre?: %d\nQuantidaItens: %d\nValor Total: %.2f\n",
-                comandas[j].cliente, comandas[j].mesa, comandas[j].isLivre, comandas[j].quantidadeItens, comandas[j].valorTotal);
+                comandas[j].mesa, comandas[j].cliente, comandas[j].isLivre, comandas[j].quantidadeItens, comandas[j].valorTotal);
         }
     }
     for(int j = 0;j < totalComandas;j++){
         if(!comandas[j].isLivre){
             printf("Comanda: %s(%s)\n",
-                comandas[j].cliente, comandas[j].mesa);
+                comandas[j].mesa, comandas[j].cliente);
         }
         for(int i = 0;i < comandas[j].quantidadeItens; i++){
             printf("iNome: %s\niPreco: %.2f\niQuantidade: %d\n",
