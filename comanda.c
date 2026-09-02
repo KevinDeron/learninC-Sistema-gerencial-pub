@@ -22,7 +22,7 @@ int criarComanda(char *mesa, char *cliente){
     int indiceN;
     for (indiceN = 0; indiceN < totalComandas; indiceN++){
         if(comandas[indiceN].isLivre){
-            if(renomearComanda(&comandas[indiceN], mesa, cliente)){
+            if(renomearComanda(&comandas[indiceN], mesa, cliente) == 0){
                 return -1;
             };
             comandas[indiceN].isLivre = 0;
@@ -39,7 +39,7 @@ int criarComanda(char *mesa, char *cliente){
     comandas = new_p;
     comandas[indiceN].quantidadeItens = 0;
     resetarComanda(&comandas[indiceN]);
-    if(renomearComanda(&comandas[indiceN], mesa, cliente)){
+    if(renomearComanda(&comandas[indiceN], mesa, cliente) == 0){
         return -1;
     };
     comandas[indiceN].isLivre = 0;
