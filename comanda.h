@@ -19,7 +19,7 @@ float calculaValorTotal(struct comanda *comanda);
 void adicionarItemComanda(struct comanda *comanda,int,struct item *novoItem,float);
 void resetarComanda(struct comanda *comanda);
 void fecharComanda(struct comanda *comanda);
-void renomearComanda(struct comanda *comanda, char *novoNomeMesa, char *novoNomeCliente);
+int renomearComanda(struct comanda *comanda, char *novoNomeMesa, char *novoNomeCliente);
 
 extern struct comanda *comandas;
 
