@@ -8,7 +8,6 @@
 int totalComandas = 6; //numero inicial de comandas a serem alocadas em memoria
 struct comanda *comandas;
 
-
 void setIniciarComandas(){
     if((comandas = calloc(totalComandas, sizeof(struct comanda))) == NULL){
         printf("Erro ao alocar memoria!\n");
@@ -19,11 +18,12 @@ void setIniciarComandas(){
     }
 }
 
-int criarComanda(char *nome){
+int criarComanda(char *mesa, char *cliente){
     int indiceN;
     for (indiceN = 0; indiceN < totalComandas; indiceN++){
         if(comandas[indiceN].isLivre){
             comandas[indiceN].isLivre = 0;
+            renomearComanda(&comandas[indiceN],mesa, cliente);
             return indiceN;
         }
     }
@@ -36,9 +36,9 @@ int criarComanda(char *nome){
     }
     comandas = new_p;
     comandas[indiceN].quantidadeItens = 0;
-    strcpy(comandas[indiceN].nome,"");
-    resetarcomanda(&comandas[indiceN]);
+    resetarComanda(&comandas[indiceN]);
     comandas[indiceN].isLivre = 0;
+    renomearComanda(&comandas[indiceN], mesa, cliente);
     return indiceN;
 };
 
@@ -57,7 +57,8 @@ void adicionarItemComanda(struct comanda *comanda, int quant, struct item *novoI
         return;
     }
     if(comanda->quantidadeItens >= 10){
-        printf("Comanda %s: numero de itens excedido(%d)\n",comanda->nome, comanda->quantidadeItens);
+        printf("Comanda %s(%s) | Numero de itens excedido(%d)\n",
+            comanda->cliente ,comanda->mesa, comanda->quantidadeItens);
         return;
     }
     for(int i = 0;i < comanda->quantidadeItens; i++){
@@ -86,7 +87,8 @@ void resetarComanda(struct comanda *comanda){
         comanda->itens[i].preco = 0;
         comanda->itens[i].quant = 0;
     }
-    strcpy(comanda->apelido,"");
+    strcpy(comanda->mesa,"");
+    strcpy(comanda->cliente,"");
     comanda->quantidadeItens = 0;
     
 };
@@ -97,7 +99,7 @@ void fecharComanda(struct comanda *comanda){
         return;
     }
        
-    printf("Comanda: %s(%s)\n", comanda->nome, comanda->apelido);
+    printf("Comanda: %s(%s)\n", comanda->mesa, comanda->cliente);
     for (int i = 0; i < comanda->quantidadeItens; i++){
         printf("%d | %s | %0.2f\n", 
             comanda->itens[i].quant, comanda->itens[i].nome, comanda->itens[i].preco);
@@ -108,18 +110,19 @@ void fecharComanda(struct comanda *comanda){
     char r;
     scanf("%c", &r);
     if(r == 's'){
-        resetarcomanda(comanda);
+        resetarComanda(comanda);
         printf("Comanda fechada[test]\n");
         return;
     }
     printf("Comanda nao fechada[test]\n");
 };
 
-void renomearComanda(struct comanda *comanda, char *novoNome){
-    if(strlen(novoNome) <= 14){
-        strcpy(comanda->apelido, novoNome);
-        printf("Comanda renomeada para %s\n", novoNome);
+void renomearComanda(struct comanda *comanda, char *novoNomeMesa, char *novoNomeCliente){
+    if(strlen(novoNomeMesa) <= 14 && strlen(novoNomeCliente) <= 14){
+        strcpy(comanda->mesa, novoNomeMesa);
+        strcpy(comanda->cliente, novoNomeCliente);
+        printf("Comanda renomeada para %s(%s)\n",comanda->cliente, comanda->mesa);
         return;
     }
-    printf("Nome maior que %zu(-1) caracteres!\n", sizeof(comanda->nome));
+    printf("Nome maior que %zu(-1) caracteres!\n", sizeof(comanda->cliente));
 };
