@@ -2,57 +2,56 @@
 #include <stdlib.h>
 #include "item.h"
 #include "cardapio.h"
-#include "mesa.h"
+#include "comanda.h"
 
-int mesaN1, mesaN2;
-
+int comandaN1, comandaN2;
 void imprime(){
-    for(int j = 0;j < totalMesas;j++){
-        if(!mesas[j].isLivre){
-            printf("Mesa: %s(%s)\nLivre?: %d\nQuantidaItens: %d\nValor Total: %.2f\n",
-                mesas[j].nome, mesas[j].apelido, mesas[j].isLivre, mesas[j].quantidadeItens, mesas[j].valorTotal);
+    for(int j = 0;j < totalComandas;j++){
+        if(!comandas[j].isLivre){
+            printf("Comanda: %s(%s)\nLivre?: %d\nQuantidaItens: %d\nValor Total: %.2f\n",
+                comandas[j].nome, comandas[j].apelido, comandas[j].isLivre, comandas[j].quantidadeItens, comandas[j].valorTotal);
         }
     }
-    for(int j = 0;j < totalMesas;j++){
-        if(!mesas[j].isLivre){
-            printf("Mesa: %s(%s)\n",
-                mesas[j].nome, mesas[j].apelido);
+    for(int j = 0;j < totalComandas;j++){
+        if(!comandas[j].isLivre){
+            printf("Comanda: %s(%s)\n",
+                comandas[j].nome, comandas[j].apelido);
         }
-        for(int i = 0;i < mesas[j].quantidadeItens; i++){
+        for(int i = 0;i < comandas[j].quantidadeItens; i++){
             printf("iNome: %s\niPreco: %.2f\niQuantidade: %d\n",
-            mesas[j].itens[i].nome, mesas[j].itens[i].preco, mesas[j].itens[i].quant);
+            comandas[j].itens[i].nome, comandas[j].itens[i].preco, comandas[j].itens[i].quant);
         }
     }
 };
 
 int main (void){
-    setIniciarMesas();
+    setIniciarComandas();
 
 
-    mesaN1 = getMesaLivre();
-    if (mesaN1 == -1)
+    comandaN1 = criarComanda();
+    if (comandaN1 == -1)
     {
         return 0;
     }
     
-    renomearMesa(&mesas[mesaN1],"test");
-    adicionarItemMesa(&mesas[mesaN1], 2, &chopp500, -1);
-    calculaValorTotal(&mesas[mesaN1]);
+    renomearComanda(&comandas[comandaN1],"test");
+    adicionarItemComanda(&comandas[comandaN1], 2, &chopp500, -1);
+    calculaValorTotal(&comandas[comandaN1]);
     
-    mesaN2 = getMesaLivre();
-    if(mesaN2 == -1){
+    comandaN2 = criarComanda();
+    if(comandaN2 == -1){
         return 0;
     }
-    renomearMesa(&mesas[mesaN2], "123test");
-    adicionarItemMesa(&mesas[mesaN2], 2,&chopp500, -1);
-    adicionarItemMesa(&mesas[mesaN2], -1,&fritas, 20);
-    adicionarItemMesa(&mesas[mesaN2], 1, &chopp500, -1);
-    calculaValorTotal(&mesas[mesaN2]);
+    renomearComanda(&comandas[comandaN2], "123test");
+    adicionarItemComanda(&comandas[comandaN2], 2,&chopp500, -1);
+    adicionarItemComanda(&comandas[comandaN2], -1,&fritas, 20);
+    adicionarItemComanda(&comandas[comandaN2], 1, &chopp500, -1);
+    calculaValorTotal(&comandas[comandaN2]);
 
     imprime();
     
-    fecharMesa(&mesas[mesaN1]);
+    fecharComanda(&comandas[comandaN1]);
     imprime();
-    free(mesas);
+    free(comandas);
     return 0;
 };
