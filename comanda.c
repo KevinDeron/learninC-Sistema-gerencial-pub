@@ -22,8 +22,10 @@ int criarComanda(char *mesa, char *cliente){
     int indiceN;
     for (indiceN = 0; indiceN < totalComandas; indiceN++){
         if(comandas[indiceN].isLivre){
+            if(renomearComanda(&comandas[indiceN], mesa, cliente)){
+                return -1;
+            };
             comandas[indiceN].isLivre = 0;
-            renomearComanda(&comandas[indiceN],mesa, cliente);
             return indiceN;
         }
     }
@@ -37,8 +39,10 @@ int criarComanda(char *mesa, char *cliente){
     comandas = new_p;
     comandas[indiceN].quantidadeItens = 0;
     resetarComanda(&comandas[indiceN]);
+    if(renomearComanda(&comandas[indiceN], mesa, cliente)){
+        return -1;
+    };
     comandas[indiceN].isLivre = 0;
-    renomearComanda(&comandas[indiceN], mesa, cliente);
     return indiceN;
 };
 
@@ -117,12 +121,13 @@ void fecharComanda(struct comanda *comanda){
     printf("Comanda nao fechada[test]\n");
 };
 
-void renomearComanda(struct comanda *comanda, char *novoNomeMesa, char *novoNomeCliente){
+int renomearComanda(struct comanda *comanda, char *novoNomeMesa, char *novoNomeCliente){
     if(strlen(novoNomeMesa) <= 14 && strlen(novoNomeCliente) <= 14){
         strcpy(comanda->mesa, novoNomeMesa);
         strcpy(comanda->cliente, novoNomeCliente);
         printf("Comanda renomeada para %s(%s)\n",comanda->cliente, comanda->mesa);
-        return;
+        return 1;
     }
     printf("Nome maior que %zu(-1) caracteres!\n", sizeof(comanda->cliente));
+    return 0;
 };
