@@ -6,7 +6,6 @@
 #define QUANT_NAO_INFORMADO -1
 
 int totalMesas = 6;
-int *p;
 struct mesa *mesas;
 
 
@@ -33,12 +32,17 @@ int getMesaLivre(){
             return mesaN;
         }
     }
-    struct mesa *new_p = realloc(mesas, sizeof(struct mesa));
+    totalMesas++;
+    struct mesa *new_p = realloc(mesas,totalMesas * sizeof(struct mesa));
     if(new_p == NULL) {
         printf("Erro ao realocar memoria!\n");
+        totalMesas--;
         return -1;
     }
     mesas = new_p;
+    mesas[mesaN].quantidadeItens = 0;
+    resetarMesa(&mesas[mesaN]);
+    mesas[mesaN].isLivre = 0;
     return mesaN;
 };
 
