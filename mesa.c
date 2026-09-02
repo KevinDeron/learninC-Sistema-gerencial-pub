@@ -1,17 +1,23 @@
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "mesa.h"
 #define PRECO_NAO_INFORMADO -1
 #define QUANT_NAO_INFORMADO -1
 
 int totalMesas = 6;
+int *p;
 struct mesa *mesas;
 
 
 void setIniciarMesas(){
+    if((mesas  = calloc(totalMesas, sizeof(struct mesa))) == NULL){
+        printf("Erro ao alocar memoria!\n");
+        return;
+    }
     for (int i = 0; i < totalMesas; i++){
-        // char numeroMesa[3];
         mesas[i].isLivre = 1;
+        // char numeroMesa[3];
         // snprintf(numeroMesa,2,"%d",i+1);
         // strcpy(mesas[i].nome,"Mesa ");
         // strcat(mesas[i].nome,numeroMesa);
@@ -20,18 +26,20 @@ void setIniciarMesas(){
 }
 
 int getMesaLivre(){
-    for (int mesaN = 0; mesaN < totalMesas; mesaN++){
+    int mesaN;
+    for (mesaN = 0; mesaN < totalMesas; mesaN++){
         if(mesas[mesaN].isLivre){
             mesas[mesaN].isLivre = 0;
             return mesaN;
-            // struct mesa *mesaLivre;
-            // mesaLivre = &mesas[mesaN];
-            // return mesaLivre;
         }
     }
-    //realloc
-    printf("nao foi possivel achar mesa livre!\n");
-    return 0;
+    struct mesa *new_p = realloc(mesas, sizeof(struct mesa));
+    if(new_p == NULL) {
+        printf("Erro ao realocar memoria!\n");
+        return -1;
+    }
+    mesas = new_p;
+    return mesaN;
 };
 
 float calculaValorTotal(struct mesa *mesa){

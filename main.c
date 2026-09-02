@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "item.h"
 #include "cardapio.h"
 #include "mesa.h"
@@ -29,11 +30,19 @@ int main (void){
 
 
     mesaN1 = getMesaLivre();
+    if (mesaN1 == -1)
+    {
+        return 0;
+    }
+    
     renomearMesa(&mesas[mesaN1],"test");
     adicionarItemMesa(&mesas[mesaN1], 2, &chopp500, -1);
     calculaValorTotal(&mesas[mesaN1]);
     
     mesaN2 = getMesaLivre();
+    if(mesaN2 == -1){
+        return 0;
+    }
     renomearMesa(&mesas[mesaN2], "123test");
     adicionarItemMesa(&mesas[mesaN2], 2,&chopp500, -1);
     adicionarItemMesa(&mesas[mesaN2], -1,&fritas, 20);
@@ -44,5 +53,6 @@ int main (void){
     
     fecharMesa(&mesas[mesaN1]);
     imprime();
+    free(mesas);
     return 0;
 };
