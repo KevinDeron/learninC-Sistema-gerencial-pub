@@ -33,16 +33,16 @@ int main (void){
     {
         return 0;
     }
-    adicionarItemComanda(&comandas[comandaN1], 2, &chopp500, -1);
+    // adicionarItemComanda(&comandas[comandaN1], 2, &chopp500, -1);
     calculaValorTotal(&comandas[comandaN1]);
     
     comandaN2 = criarComanda("", "123test");
     if(comandaN2 == -1){
         return 0;
     }
-    adicionarItemComanda(&comandas[comandaN2], 2,&chopp500, -1);
-    adicionarItemComanda(&comandas[comandaN2], -1,&fritas, 20);
-    adicionarItemComanda(&comandas[comandaN2], 1, &chopp500, -1);
+    // adicionarItemComanda(&comandas[comandaN2], 2,&chopp500, -1);
+    // adicionarItemComanda(&comandas[comandaN2], -1,&fritas, 20);
+    // adicionarItemComanda(&comandas[comandaN2], 1, &chopp500, -1);
     calculaValorTotal(&comandas[comandaN2]);
 
     imprime();

@@ -7,6 +7,7 @@
 
 int totalComandas = 6; //numero inicial de comandas a serem alocadas em memoria
 struct comanda *comandas;
+struct item *itens;
 
 void setIniciarComandas(){
     if((comandas = calloc(totalComandas, sizeof(struct comanda))) == NULL){
@@ -16,6 +17,7 @@ void setIniciarComandas(){
     for (int i = 0; i < totalComandas; i++){
         comandas[i].isLivre = 1;
     }
+    itens = realloc(NULL,sizeof(struct item) * totalComandas);
 }
 
 int criarComanda(char *mesa, char *cliente){
@@ -32,7 +34,7 @@ int criarComanda(char *mesa, char *cliente){
     totalComandas++;
     struct comanda *new_p = realloc(comandas,totalComandas * sizeof(struct comanda));
     if(new_p == NULL) {
-        printf("Erro ao realocar memoria!\n");
+        printf("Erro ao realocar memoria![Comanda]\n");
         totalComandas--;
         return -1;
     }
