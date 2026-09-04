@@ -27,10 +27,10 @@ void imprime(){
 int main (void){
     setIniciarComandas();
 
+    adicionarItemCardapio("Chopp 500",15);
 
     comandaN1 = criarComanda("Mesa 1", "");
-    if (comandaN1 == -1)
-    {
+    if (comandaN1 == -1){
         return 0;
     }
     // adicionarItemComanda(&comandas[comandaN1], 2, &chopp500, -1);
