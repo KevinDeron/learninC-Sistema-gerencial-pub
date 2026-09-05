@@ -21,5 +21,6 @@ struct item *getItensCardapio(){
             indiceN++;
         }
     }
+    totalItensCardapio = indiceN + 1;
     return cardapio;
 }

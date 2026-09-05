@@ -15,10 +15,6 @@ int setIniciarComandas(){
         printf("Erro ao alocar memoria![setIniciarComandas[comanda]]\n");
         return -1;
     }
-    // if((itensComanda = calloc(1,sizeof(struct item))) == NULL){
-    //     printf("Erro ao alocar memoria[setIniciarComandas[itensComanda]]\n");
-    //     return -1;
-    // }
     for (int i = 0; i < totalComandas; i++){
         comandas[i].isLivre = 1;
     }
@@ -132,7 +128,7 @@ void fecharComanda(struct comanda *comanda){
     printf("Valor total: %0.2f\n", comanda->valorTotal);
     printf("Deseja fechar[s/n?[placeholder]\n");
     char r;
-    scanf("%c", &r);
+    scanf(" %c", &r);
     if(r == 's'){
         resetarComanda(comanda);
         printf("Comanda fechada[test]\n");
