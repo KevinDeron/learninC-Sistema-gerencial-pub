@@ -10,17 +10,18 @@ struct comanda
     float valorTotal;
     int isLivre;
     int quantidadeItens;
-    struct item itens[10];
+    struct item *itensComanda;
 };
 
-void setIniciarComandas();
+int setIniciarComandas();
 int criarComanda(char *mesa, char *cliente);
 float calculaValorTotal(struct comanda *comanda);
-void adicionarItemComanda(struct comanda *comanda,int,struct item *novoItem,float);
+int adicionarItemComanda(struct comanda *comanda,int,int novoItem,float);
 void resetarComanda(struct comanda *comanda);
 void fecharComanda(struct comanda *comanda);
 int renomearComanda(struct comanda *comanda, char *novoNomeMesa, char *novoNomeCliente);
 
 extern struct comanda *comandas;
+extern struct item *itensComanda;
 
 #endif

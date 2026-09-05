@@ -4,7 +4,7 @@
 #include "cardapio.h"
 #include "comanda.h"
 
-int comandaN1, comandaN2;
+int comandaN1, comandaN2, t;
 void imprime(){
     for(int j = 0;j < totalComandas;j++){
         if(!comandas[j].isLivre){
@@ -19,36 +19,54 @@ void imprime(){
         }
         for(int i = 0;i < comandas[j].quantidadeItens; i++){
             printf("iNome: %s\niPreco: %.2f\niQuantidade: %d\n",
-            comandas[j].itens[i].nome, comandas[j].itens[i].preco, comandas[j].itens[i].quant);
+            comandas[j].itensComanda[i].nome, comandas[j].itensComanda[i].preco, comandas[j].itensComanda[i].quant);
         }
     }
 };
 
 int main (void){
-    setIniciarComandas();
+    if(setIniciarComandas() == -1){
+        return 0;
+    };
 
-    adicionarItemCardapio("Chopp 500",15);
+    int chopp500 = adicionarItem("Chopp 500",15);
+    if(chopp500 == -1){return 0;}
+    int fritas = adicionarItem("Fritas",25);
+    if(fritas == -1){return 0;}
+    int chopp400 = adicionarItem("Chopp 400",13);
+    if(chopp400 == -1){return 0;}
 
     comandaN1 = criarComanda("Mesa 1", "");
-    if (comandaN1 == -1){
-        return 0;
-    }
-    // adicionarItemComanda(&comandas[comandaN1], 2, &chopp500, -1);
+    if (comandaN1 == -1){return 0;}
+    t = adicionarItemComanda(&comandas[comandaN1], 2, chopp500, -1);
+    if(t == -1){return 0;}
+    t = adicionarItemComanda(&comandas[comandaN1], 10, chopp500, -1);
+    if(t == -1){return 0;}
+    t = adicionarItemComanda(&comandas[comandaN1], 1, fritas, -1);
+    if(t == -1){return 0;}
+    t = adicionarItemComanda(&comandas[comandaN1], 1, chopp400, -1);
+    if(t == -1){return 0;}
     calculaValorTotal(&comandas[comandaN1]);
     
     comandaN2 = criarComanda("", "123test");
-    if(comandaN2 == -1){
-        return 0;
-    }
-    // adicionarItemComanda(&comandas[comandaN2], 2,&chopp500, -1);
-    // adicionarItemComanda(&comandas[comandaN2], -1,&fritas, 20);
-    // adicionarItemComanda(&comandas[comandaN2], 1, &chopp500, -1);
-    calculaValorTotal(&comandas[comandaN2]);
+    if(comandaN2 == -1){return 0;}
+
+    t = adicionarItemComanda(&comandas[comandaN2], 2,chopp500, -1);
+    if(t == -1){return 0;}
+    t = adicionarItemComanda(&comandas[comandaN2], -1,fritas, 20);
+    if(t == -1){return 0;}
+    t = adicionarItemComanda(&comandas[comandaN2], 1, chopp400, -1);
+    if(t == -1){return 0;}
+    t = calculaValorTotal(&comandas[comandaN2]);
+    if(t == -1){return 0;}
 
     imprime();
     
     fecharComanda(&comandas[comandaN1]);
+    fecharComanda(&comandas[comandaN2]);
     imprime();
     free(comandas);
+    free(itens);
+    free(cardapio);
     return 0;
 };

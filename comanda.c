@@ -1,23 +1,29 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "item.h"
 #include "comanda.h"
 #define PRECO_NAO_INFORMADO -1
 #define QUANT_NAO_INFORMADO -1
 
 int totalComandas = 6; //numero inicial de comandas a serem alocadas em memoria
 struct comanda *comandas;
-struct item *itens;
+struct item *itensComanda;
 
-void setIniciarComandas(){
+int setIniciarComandas(){
     if((comandas = calloc(totalComandas, sizeof(struct comanda))) == NULL){
-        printf("Erro ao alocar memoria!\n");
-        return;
+        printf("Erro ao alocar memoria![setIniciarComandas[comanda]]\n");
+        return -1;
     }
+    // if((itensComanda = calloc(1,sizeof(struct item))) == NULL){
+    //     printf("Erro ao alocar memoria[setIniciarComandas[itensComanda]]\n");
+    //     return -1;
+    // }
     for (int i = 0; i < totalComandas; i++){
         comandas[i].isLivre = 1;
     }
     itens = realloc(NULL,sizeof(struct item) * totalComandas);
+    return 0;
 }
 
 int criarComanda(char *mesa, char *cliente){
@@ -51,52 +57,64 @@ int criarComanda(char *mesa, char *cliente){
 float calculaValorTotal(struct comanda *comanda){
     float total = 0;
     for(int i = 0;i < comanda->quantidadeItens;i++){
-        total += (comanda->itens[i].preco * comanda->itens[i].quant);
+        total += (comanda->itensComanda[i].preco * comanda->itensComanda[i].quant);
     }
     comanda->valorTotal = total;
     return total;
 };
 
-void adicionarItemComanda(struct comanda *comanda, int quant, struct item *novoItem,float preco){
+int adicionarItemComanda(struct comanda *comanda, int quant, int novoItem,float preco){
     if(comanda->isLivre){
         printf("Comanda esta livre!\n");
-        return;
+        return -1;
     }
-    if(comanda->quantidadeItens >= 10){
-        printf("Comanda %s(%s) | Numero de itens excedido(%d)\n",
-            comanda->mesa ,comanda->cliente, comanda->quantidadeItens);
-        return;
-    }
+    // printf("Comanda %s(%s) | Numero de itens excedido(%d)\n",
+        // comanda->mesa ,comanda->cliente, comanda->quantidadeItens);
+    
     for(int i = 0;i < comanda->quantidadeItens; i++){
-        if(!strcmp(comanda->itens[i].nome,novoItem->nome)){
-            comanda->itens[i].quant += quant;
-            return;
+        if(!strcmp(comanda->itensComanda[i].nome,itens[novoItem].nome)){
+            comanda->itensComanda[i].quant += quant;
+            return 0;
         }
     }
-    comanda->itens[comanda->quantidadeItens] = *novoItem;
-    if(QUANT_NAO_INFORMADO != quant){
-        comanda->itens[comanda->quantidadeItens].quant = quant;
+    if(comanda->quantidadeItens > 0){
+        struct item *new_p = realloc(comanda->itensComanda, (comanda->quantidadeItens + 1) * sizeof(struct item));
+        if(new_p == NULL){
+            printf("Falha ao alocar memoria[Comanda>Itens]\n");
+            return -1;
+        }
+        comanda->itensComanda = new_p;
     }else{
-        comanda->itens[comanda->quantidadeItens].quant = 1;
+        if((comanda->itensComanda = calloc(1,sizeof(struct item))) == NULL){
+            printf("Erro ao alocar memoria[iniciar itensComanda\n");
+            return -1;
+        }
+    }
+    comanda->itensComanda[comanda->quantidadeItens] = itens[novoItem];
+    if(QUANT_NAO_INFORMADO != quant){
+        comanda->itensComanda[comanda->quantidadeItens].quant = quant;
+    }else{
+        comanda->itensComanda[comanda->quantidadeItens].quant = 1;
     }
     if(PRECO_NAO_INFORMADO != preco){
-        comanda->itens[comanda->quantidadeItens].preco = preco;
+        comanda->itensComanda[comanda->quantidadeItens].preco = preco;
     }
     comanda->quantidadeItens++;
+    return 0;
 };
 
 void resetarComanda(struct comanda *comanda){
     comanda->isLivre = 1;
     comanda->valorTotal = 0;
-    for (int i = 0; i < comanda->quantidadeItens; i++){
-        strcpy(comanda->itens[i].nome,"");
-        comanda->itens[i].preco = 0;
-        comanda->itens[i].quant = 0;
-    }
+    // for (int i = 0; i < comanda->quantidadeItens; i++){
+    //     strcpy(comanda->itensComanda[i].nome,"");
+    //     comanda->itensComanda[i].preco = 0;
+    //     comanda->itensComanda[i].quant = 0;
+    // }
     strcpy(comanda->mesa,"");
     strcpy(comanda->cliente,"");
+    free(comanda->itensComanda);
     comanda->quantidadeItens = 0;
-    
 };
 
 void fecharComanda(struct comanda *comanda){
@@ -108,7 +126,7 @@ void fecharComanda(struct comanda *comanda){
     printf("Comanda: %s(%s)\n", comanda->mesa, comanda->cliente);
     for (int i = 0; i < comanda->quantidadeItens; i++){
         printf("%d | %s | %0.2f\n", 
-            comanda->itens[i].quant, comanda->itens[i].nome, comanda->itens[i].preco);
+            comanda->itensComanda[i].quant, comanda->itensComanda[i].nome, comanda->itensComanda[i].preco);
     }
     calculaValorTotal(comanda);
     printf("Valor total: %0.2f\n", comanda->valorTotal);

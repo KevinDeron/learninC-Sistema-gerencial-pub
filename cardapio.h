@@ -3,8 +3,9 @@
 #include "item.h"
 
 extern int totalItensCardapio;
-extern struct item *cardapio;
 
-int adicionarItemCardapio(char *nome, float preco);
+struct item *getItensCardapio();
+
+extern struct item *cardapio;
 
 #endif
