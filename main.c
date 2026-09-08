@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sqlite3.h>
+#include "database.h"
 #include "item.h"
 #include "cardapio.h"
 #include "comanda.h"
 
-int comandaN1, comandaN2, t;
+int comandaN1, comandaN2, test;
+
 void imprime(){
     for(int j = 0;j < totalComandas;j++){
         if(!comandas[j].isLivre){
@@ -24,10 +27,26 @@ void imprime(){
     }
 };
 
-int main (void){
+int main (int argc, char *argv[]){
+
+    rc = sqlite3_open("data.db",&db);
+    if(rc){
+        fprintf(stderr, "Nao foi possivel abrir database: %s\n",sqlite3_errmsg(db));
+        return 0;
+    }else{
+        fprintf(stderr,"Database aberta com sucesso!\n");
+    }
+    int dbInicializada = initDB(db);
+    if(dbInicializada == 0){
+        fprintf(stderr, "Nao foi possivel inicializar a database!\n");
+        return 0;
+    }
+
     if(setIniciarComandas() == -1){
         return 0;
     };
+    //==================DEBUG=======================
+    //Sera removido com implementacao de python(ui)
 
     int chopp500 = adicionarItem("Chopp 500",15);
     if(chopp500 == -1){return 0;}
@@ -38,35 +57,42 @@ int main (void){
 
     comandaN1 = criarComanda("Mesa 1", "");
     if (comandaN1 == -1){return 0;}
-    t = adicionarItemComanda(&comandas[comandaN1], 2, chopp500, -1);
-    if(t == -1){return 0;}
-    t = adicionarItemComanda(&comandas[comandaN1], 10, chopp500, -1);
-    if(t == -1){return 0;}
-    t = adicionarItemComanda(&comandas[comandaN1], 1, fritas, -1);
-    if(t == -1){return 0;}
-    t = adicionarItemComanda(&comandas[comandaN1], 1, chopp400, -1);
-    if(t == -1){return 0;}
+    test = adicionarItemComanda(&comandas[comandaN1], 2, chopp500, -1);
+    if(test == -1){return 0;}
+    test = adicionarItemComanda(&comandas[comandaN1], 10, chopp500, -1);
+    if(test == -1){return 0;}
+    test = adicionarItemComanda(&comandas[comandaN1], 1, fritas, -1);
+    if(test == -1){return 0;}
+    test = adicionarItemComanda(&comandas[comandaN1], 1, chopp400, -1);
+    if(test == -1){return 0;}
     calculaValorTotal(&comandas[comandaN1]);
     
     comandaN2 = criarComanda("", "123test");
     if(comandaN2 == -1){return 0;}
 
-    t = adicionarItemComanda(&comandas[comandaN2], 2,chopp500, -1);
-    if(t == -1){return 0;}
-    t = adicionarItemComanda(&comandas[comandaN2], -1,fritas, 20);
-    if(t == -1){return 0;}
-    t = adicionarItemComanda(&comandas[comandaN2], 1, chopp400, -1);
-    if(t == -1){return 0;}
-    t = calculaValorTotal(&comandas[comandaN2]);
-    if(t == -1){return 0;}
+    test = adicionarItemComanda(&comandas[comandaN2], 2,chopp500, -1);
+    if(test == -1){return 0;}
+    test = adicionarItemComanda(&comandas[comandaN2], -1,fritas, 20);
+    if(test == -1){return 0;}
+    test = adicionarItemComanda(&comandas[comandaN2], 1, chopp400, -1);
+    if(test == -1){return 0;}
+    test = calculaValorTotal(&comandas[comandaN2]);
+    if(test == -1){return 0;}
 
     imprime();
     
     fecharComanda(&comandas[comandaN1]);
     fecharComanda(&comandas[comandaN2]);
     imprime();
+
+    //============FIM DEBUG=================
+    //=============CLEANUP==================
     free(comandas);
     free(itens);
     free(cardapio);
+
+    printf("Fechando database!\n");
+    sqlite3_close(db);
+    db = NULL;
     return 0;
 };
