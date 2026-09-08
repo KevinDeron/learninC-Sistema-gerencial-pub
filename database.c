@@ -2,6 +2,7 @@
 #include <sqlite3.h>
 
 sqlite3 *db;
+sqlite3_stmt *stmt;
 int rc;
 char *zErrMsg;
 char *sql;
@@ -14,7 +15,7 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
    return 0;
 }
 
-int initDB(sqlite3 *db){
+int initDB(){
     zErrMsg = NULL;
     if(!db){
         fprintf(stderr ,"NULL pointer passado para %s\n", __func__);
@@ -85,7 +86,7 @@ int initDB(sqlite3 *db){
             "comanda_id     INTEGER NOT NULL REFERENCES comandas(id)," \
             "item_id        INTEGER NOT NULL REFERENCES itens(id)," \
             "quantidade     INTEGER NOT NULL," \
-            "preco_unitario INTEGER NOT NULL);";//preco final cobrado
+            "preco_unitario REAL NOT NULL);";//preco final cobrado
 
     rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
 

@@ -42,18 +42,18 @@ int main (int argc, char *argv[]){
         return 0;
     }
 
-    if(setIniciarComandas() == -1){
-        return 0;
-    };
+    if(setIniciarComandas() == -1){return 0;}
     //==================DEBUG=======================
     //Sera removido com implementacao de python(ui)
 
-    int chopp500 = adicionarItem("Chopp 500",15);
+    int chopp500 = adicionarItem("Chopp 500","Chopp",15);
     if(chopp500 == -1){return 0;}
-    int fritas = adicionarItem("Fritas",25);
+    int fritas = adicionarItem("Fritas","Porcoes",25);
     if(fritas == -1){return 0;}
-    int chopp400 = adicionarItem("Chopp 400",13);
+    int chopp400 = adicionarItem("Chopp 400","Chopp",13);
     if(chopp400 == -1){return 0;}
+
+    if(getItensCardapio() == NULL){return 0;}
 
     comandaN1 = criarComanda("Mesa 1", "");
     if (comandaN1 == -1){return 0;}

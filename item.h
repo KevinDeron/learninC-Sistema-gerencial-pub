@@ -5,6 +5,7 @@ extern int totalItens;
 
 struct item
 {
+    int id_database;
     char nome[15];
     char categoria[15];
     int quant;
@@ -12,7 +13,7 @@ struct item
     int ativo;//bool
 };
 
-int adicionarItem(char *nome, float preco);
+int adicionarItem(char *nome, char *categoria, float preco);
 
 extern struct item *itens;
 

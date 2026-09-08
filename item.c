@@ -1,12 +1,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <sqlite3.h>
+#include "database.h"
 #include "item.h"
 
 int totalItens = 0;
 struct item *itens;
 
-int adicionarItem(char *nome, float preco){
+int adicionarItem(char *nome, char *categoria, float preco){
     int indiceN;
     if (strlen(nome) > 14){
         printf("Nome do item maior que %zu caracteres", sizeof(itens->nome) + 1);
@@ -31,5 +33,16 @@ int adicionarItem(char *nome, float preco){
     indiceN = totalItens - 1;
     strcpy(itens[indiceN].nome, nome);
     itens[indiceN].preco = preco;
+    //DB
+    if( sqlite3_prepare_v2(db,"INSERT INTO itens(nome, categoria, preco) VALUES (?,?,?)",-1,&stmt,NULL)){
+        printf("Erro SQL em: %s\n",__func__);
+        return -1;
+    }
+    sqlite3_bind_text(stmt,1,nome,-1,NULL);
+    sqlite3_bind_text(stmt,2,categoria,-1,NULL);
+    sqlite3_bind_double(stmt,3,preco);
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    //
     return indiceN;
 }
