@@ -10,11 +10,10 @@ struct item
     char categoria[15];
     int quant;
     float preco;
-    int ativo;//bool
+    int isAtivo;//bool
 };
 
 int adicionarItem(char *nome, char *categoria, float preco);
-
-extern struct item *itens;
+int setItemAtivo(int isAtivo, int id_item);
 
 #endif

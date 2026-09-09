@@ -46,18 +46,20 @@ int main (int argc, char *argv[]){
     //==================DEBUG=======================
     //Sera removido com implementacao de python(ui)
 
-    int chopp500 = adicionarItem("Chopp 500","Chopp",15);
+    int chopp500 = adicionarItem("Chopp 500","Chopp",15.0);
     if(chopp500 == -1){return 0;}
-    int fritas = adicionarItem("Fritas","Porcoes",25);
+    int fritas = adicionarItem("Fritas","Porcoes",25.0);
     if(fritas == -1){return 0;}
-    int chopp400 = adicionarItem("Chopp 400","Chopp",13);
+    int chopp400 = adicionarItem("Chopp 400","Chopp",13.0);
+    if(chopp400 == -1){return 0;}
+    chopp400 = adicionarItem("Chopp 400","Chopp",13.0);
     if(chopp400 == -1){return 0;}
 
     if(getItensCardapio() == NULL){return 0;}
 
     comandaN1 = criarComanda("Mesa 1", "");
     if (comandaN1 == -1){return 0;}
-    test = adicionarItemComanda(&comandas[comandaN1], 2, chopp500, -1);
+    test = adicionarItemComanda(&comandas[comandaN1], 2, chopp500, 13);
     if(test == -1){return 0;}
     test = adicionarItemComanda(&comandas[comandaN1], 10, chopp500, -1);
     if(test == -1){return 0;}
@@ -88,7 +90,7 @@ int main (int argc, char *argv[]){
     //============FIM DEBUG=================
     //=============CLEANUP==================
     free(comandas);
-    free(itens);
+    // free(itens);
     free(cardapio);
 
     printf("Fechando database!\n");
