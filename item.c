@@ -36,7 +36,7 @@ int adicionarItem(char *nome, char *categoria, float preco){
             if(strcmp(nome,c) == 0){
                 printf("Item (%s) ja existe!\n",nome);
                 sqlite3_finalize(stmt);
-                return 1;
+                return -1;
             }
         }
         sqlite3_reset(stmt);

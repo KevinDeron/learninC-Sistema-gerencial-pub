@@ -52,8 +52,8 @@ int main (int argc, char *argv[]){
     if(fritas == -1){return 0;}
     int chopp400 = adicionarItem("Chopp 400","Chopp",13.0);
     if(chopp400 == -1){return 0;}
-    chopp400 = adicionarItem("Chopp 400","Chopp",13.0);
-    if(chopp400 == -1){return 0;}
+    // chopp400 = adicionarItem("Chopp 400","Chopp",13.0);
+    // if(chopp400 == -1){return 0;}
 
     if(getItensCardapio() == NULL){return 0;}
 

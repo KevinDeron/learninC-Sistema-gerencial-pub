@@ -64,10 +64,12 @@ int initDB(){
     //Tabela itens
     sql =   "CREATE TABLE IF NOT EXISTS itens(" \
             "ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \
-            "nome       TEXT," \
-            "categoria  TEXT," \
-            "preco      REAL NOT NULL," \
-            "isAtivo      INTEGER NOT NULL DEFAULT 1);";//1=ativo, 0=inativo
+            "nome           TEXT," \
+            "categoria      TEXT," \
+            "preco          REAL NOT NULL," \
+            "isAtivo        INTEGER NOT NULL DEFAULT 1,"  \ 
+            "adicionado_em  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP," \
+            "removido_em    TIMESTAMP);";
 
     rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
 

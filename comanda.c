@@ -89,12 +89,24 @@ int adicionarItemComanda(struct comanda *comanda, int quant, int id_item,float p
         printf("Comanda esta livre!\n");
         return -1;
     }
+    if(id_item == -1){
+        printf("Item nao existe![%s]\n",__func__);
+        return -1;
+    }
     if(comanda->quantidadeItens > 0){
         for(int indiceN = 0;indiceN < comanda->quantidadeItens; indiceN++){
-            if(strcmp(comanda->itensComanda[indiceN].nome,cardapio[id_item].nome) == 0){
-                comanda->itensComanda[indiceN].quant += quant;
-                //DB TIMESTAMP
-                return 0;
+            if(strcmp(comanda->itensComanda[indiceN].nome, cardapio[id_item].nome) == 0){
+                if(comanda->itensComanda[indiceN].preco == preco){
+                    if(QUANT_NAO_INFORMADO == quant){
+                        comanda->itensComanda[indiceN].quant += 1;
+                        // sqlite3_finalize(stmt);
+                        return 0;
+                    }
+                    comanda->itensComanda[indiceN].quant += quant;
+                    //DB TIMESTAMP
+                    // sqlite3_finalize(stmt);
+                    return 0;
+                }
             }
         }
 
@@ -128,6 +140,7 @@ int adicionarItemComanda(struct comanda *comanda, int quant, int id_item,float p
         comanda->itensComanda[comanda->quantidadeItens].preco = preco;
     }
     comanda->quantidadeItens++;
+    // sqlite3_finalize(stmt);
     return 0;
 };
 
