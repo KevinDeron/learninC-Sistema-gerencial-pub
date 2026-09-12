@@ -62,13 +62,11 @@ int main (int argc, char *argv[]){
     // chopp400 = adicionarItem("Chopp 400","Chopp",13.0);
     // if(chopp400 == -1){return 0;}
     if(getItensCardapio() == NULL){return 0;}
-    // imprime();
+    imprime();
 
     comandaN1 = criarComanda("Mesa 1", " ");
-
-    // if(comandaN1 == 1){return 0;}
-
     if (comandaN1 == -1){return 0;}
+
     test = adicionarItemComanda(comandaN1, 2, chopp500, 13);
     if(test == -1){return 0;}
     test = adicionarItemComanda(comandaN1, 10, chopp500, -1);
@@ -79,10 +77,7 @@ int main (int argc, char *argv[]){
     if(test == -1){return 0;}
     calculaValorTotal(comandaN1);
     
-    // printf("TEST LALALA MAIN 1\n");
     comandaN2 = criarComanda(" ", "123test");
-    // printf("COMANDA TEST %d\n",comandaN2);
-    // printf("COMANDA TEST %d\n",chopp500);
     if(comandaN2 == -1){return 0;}
 
     test = adicionarItemComanda(comandaN2, 2,chopp500, -1);
@@ -96,7 +91,6 @@ int main (int argc, char *argv[]){
 
     imprime();
     
-    printf("COMANDA TEST %d\n",comandaN1);
     fecharComanda(comandaN1);
     fecharComanda(comandaN2);
     imprime();
@@ -104,7 +98,6 @@ int main (int argc, char *argv[]){
     //============FIM DEBUG=================
     //=============CLEANUP==================
     free(comandas);
-    // free(itens);
     free(cardapio);
 
     printf("Fechando database!\n");

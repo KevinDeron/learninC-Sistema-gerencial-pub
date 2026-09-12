@@ -25,8 +25,7 @@ struct item *itensComanda;
 //     return 0;
 // }
 
-int criarComanda(char *mesa, char *cliente){
-    // printf("TOTAL COMANDAS: %d\n",totalComandas);
+int criarComanda(char *mesa, char *cliente){//YEAH, I KNOW, ITS UGLY, THIS HAS TO BE FIXED '-' someday(tm)
     int indiceN = 0;
     int id_database_comanda;
     if(totalComandas > 0){
@@ -57,6 +56,7 @@ int criarComanda(char *mesa, char *cliente){
             return -1;
         }
         comandas =  new_p;
+        comandas[indiceN].quantidadeItens = 0;
         resetarComanda(&comandas[indiceN]);
         if(renomearComanda(&comandas[indiceN], mesa, cliente) == -1){return -1;};
         comandas[indiceN].isLivre = 0;
@@ -83,6 +83,7 @@ int criarComanda(char *mesa, char *cliente){
             return -1;
         }
         comandas =  new_p;
+        comandas[indiceN].quantidadeItens = 0;
         resetarComanda(&comandas[indiceN]);
         if(renomearComanda(&comandas[indiceN], mesa, cliente) == -1){return -1;};
         comandas[indiceN].isLivre = 0;
@@ -116,9 +117,7 @@ float calculaValorTotal(int id_database_comanda){
 };
 
 int getItemCardapioIndice(int id_database_item){
-    // int id_comanda = getComandaIndice(id_database_comanda);
     for (int indiceN = 0;indiceN < totalItensCardapio; indiceN++){
-        // printf("TEST %d\n",comandas[id_comanda].itensComanda[indiceN].id_database);
         if(cardapio[indiceN].id_database_item == id_database_item){
             return indiceN;
         }
@@ -134,11 +133,7 @@ int adicionarItemComanda(int id_database_comanda, int quant, int id_database_ite
         printf("Comanda esta livre![%s]\n",__func__);
         return -1;
     }
-    printf("TEST id_database_item(%d) %s\n",id_database_item,__func__);
-    printf("TEST id_database_comanda(%d) %s\n",id_database_comanda,__func__);
     indiceCardapio = getItemCardapioIndice(id_database_item);
-    printf("TEST indiceCardapio(%d) %s\n",indiceCardapio,__func__);
-    // printf("TEST id_database_comanda(%d) %s\n",id_database_comanda,__func__);
     if(indiceCardapio == -1){return -1;};
     if(comandas[id_comanda].quantidadeItens > 0){
         for(int indiceN = 0;indiceN < comandas[id_comanda].quantidadeItens; indiceN++){
@@ -193,7 +188,6 @@ int adicionarItemComanda(int id_database_comanda, int quant, int id_database_ite
 };
 
 void resetarComanda(struct comanda *comanda){
-    // int id_comanda = getComandaIndice(id_database_comanda);
     comanda->isLivre = 1;
     comanda->valorTotal = 0;
     strcpy(comanda->mesa," ");
@@ -233,10 +227,8 @@ int fecharComanda(int id_database_comanda){
         sqlite3_step(stmt);
         sqlite3_finalize(stmt);
         resetarComanda(&comandas[id_comanda]);
-        printf("Comanda fechada[test]\n");
         return 0;
     }
-    printf("Comanda nao fechada[test]\n");
     return 1;
 };
 
