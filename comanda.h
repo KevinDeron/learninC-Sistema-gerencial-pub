@@ -5,6 +5,7 @@ extern int totalComandas;
 
 struct comanda
 {
+    int id_database_comanda;
     char mesa[15];
     char cliente[15];
     float valorTotal;
@@ -15,11 +16,13 @@ struct comanda
 
 int setIniciarComandas();
 int criarComanda(char *mesa, char *cliente);
-float calculaValorTotal(struct comanda *comanda);
-int adicionarItemComanda(struct comanda *comanda,int,int novoItem,float);
+float calculaValorTotal(int id_database_comanda);
+int getItemCardapioIndice(int id_database_item);
+int adicionarItemComanda(int id_database_comanda, int quant, int id_database_item, float preco);
 void resetarComanda(struct comanda *comanda);
-void fecharComanda(struct comanda *comanda);
+int fecharComanda(int id_database_comanda);
 int renomearComanda(struct comanda *comanda, char *novoNomeMesa, char *novoNomeCliente);
+int getComandaIndice(int id_database_comanda);
 
 extern struct comanda *comandas;
 extern struct item *itensComanda;

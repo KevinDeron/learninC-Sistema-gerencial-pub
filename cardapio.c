@@ -26,7 +26,7 @@ struct item *getItensCardapio(){
             return NULL;
         }
         cardapio = new_p;
-        cardapio[indiceN].id_database = sqlite3_column_int(stmt,0);
+        cardapio[indiceN].id_database_item = sqlite3_column_int(stmt,0);
         c = sqlite3_column_text(stmt,1);
             strcpy(cardapio[indiceN].nome,c);
         c = sqlite3_column_text(stmt,2);

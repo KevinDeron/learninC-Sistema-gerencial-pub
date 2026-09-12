@@ -67,9 +67,7 @@ int initDB(){
             "nome           TEXT," \
             "categoria      TEXT," \
             "preco          REAL NOT NULL," \
-            "isAtivo        INTEGER NOT NULL DEFAULT 1,"  \ 
-            "adicionado_em  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP," \
-            "removido_em    TIMESTAMP);";
+            "isAtivo        INTEGER NOT NULL DEFAULT 1);"; //1=ativo , 0=inativo
 
     rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
 
@@ -88,7 +86,9 @@ int initDB(){
             "comanda_id     INTEGER NOT NULL REFERENCES comandas(id)," \
             "item_id        INTEGER NOT NULL REFERENCES itens(id)," \
             "quantidade     INTEGER NOT NULL," \
-            "preco_unitario REAL NOT NULL);";//preco final cobrado
+            "preco_unitario REAL NOT NULL," \
+            "adicionado_em  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP," \
+            "removido_em    TIMESTAMP);";
 
     rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
 
