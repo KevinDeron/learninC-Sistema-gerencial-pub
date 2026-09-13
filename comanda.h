@@ -17,7 +17,6 @@ struct comanda
 int setIniciarComandas();
 int criarComanda(char *mesa, char *cliente);
 float calculaValorTotal(int id_database_comanda);
-int getItemCardapioIndice(int id_database_item);
 int adicionarItemComanda(int id_database_comanda, int quant, int id_database_item, float preco);
 void resetarComanda(struct comanda *comanda);
 int fecharComanda(int id_database_comanda);

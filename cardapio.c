@@ -38,3 +38,13 @@ struct item *getItensCardapio(){
     sqlite3_finalize(stmt);
     return cardapio;
 }
+
+int getItemCardapioIndice(int id_database_item){
+    for (int indiceN = 0;indiceN < totalItensCardapio; indiceN++){
+        if(cardapio[indiceN].id_database_item == id_database_item){
+            return indiceN;
+        }
+    }
+    printf("Item nao existe![%s]\n",__func__);
+    return -1;
+}
