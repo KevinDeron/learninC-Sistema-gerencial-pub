@@ -28,14 +28,13 @@ struct item *itensComanda;
 int criarComanda(char *mesa, char *cliente){//YEAH, I KNOW, ITS UGLY, THIS HAS TO BE FIXED '-' someday(tm)
     int indiceN = 0;
     int id_database_comanda;
-    if(sqlite3_prepare_v2(db,"INSERT INTO comandas (mesa,cliente,aberta_em) VALUES(?,?,?)",-1,&stmt,NULL)){
+    if(sqlite3_prepare_v2(db,"INSERT INTO comandas (mesa,cliente) VALUES(?,?)",-1,&stmt,NULL)){
         printf("Erro SQL(%s) em: %s\n",sqlite3_errmsg(db),__func__);
         sqlite3_finalize(stmt);
         return -1;
     }
     sqlite3_bind_text(stmt,1,mesa,-1,NULL);
     sqlite3_bind_text(stmt,2,cliente,-1,NULL);
-    sqlite3_bind_text(stmt,3,__TIMESTAMP__,-1,NULL);//TIMESTAMP
     if(totalComandas > 0){
         for(indiceN = 0;indiceN < totalComandas;indiceN++){
             if(comandas[indiceN].isLivre == 1){
@@ -105,16 +104,15 @@ int adicionarItemComanda(int id_database_comanda, int quant, int id_database_ite
     indiceCardapio = getItemCardapioIndice(id_database_item);
     if(indiceCardapio == -1){return -1;};
     sql =   "INSERT INTO comanda_itens " \
-            "(comanda_id, item_id, quantidade, preco_unitario, adicionado_em) " \
-            "VALUES (?,?,?,?,?);";
-    // "(comanda_id = 1, item_id = 2, quantidade = 3, preco_unitario = 4, adicionado_em = 5) "
+            "(comanda_id, item_id, quantidade, preco_unitario) " \
+            "VALUES (?,?,?,?);";
+    // "(comanda_id = 1, item_id = 2, quantidade = 3, preco_unitario = 4) "
     if(sqlite3_prepare_v2(db,sql,-1,&stmt,NULL)){
         printf("Erro SQL(%s) em: %s\n",sqlite3_errmsg(db),__func__);
         return -1;
     }
     sqlite3_bind_int(stmt,1,id_database_comanda);
     sqlite3_bind_int(stmt,2,id_database_item);
-    sqlite3_bind_text(stmt,5,__TIME__,-1,NULL);
 
     if(comandas[id_comanda].quantidadeItens > 0){
         for(indiceN = 0;indiceN < comandas[id_comanda].quantidadeItens; indiceN++){
@@ -201,12 +199,11 @@ int fecharComanda(int id_database_comanda){
     char r;
     scanf(" %c", &r);
     if(r == 's'){
-        if(sqlite3_prepare_v2(db,"UPDATE comandas SET fechada_em = ? WHERE ID == ?",-1,&stmt,NULL)){
+        if(sqlite3_prepare_v2(db,"UPDATE comandas SET fechada_em = CURRENT_TIMESTAMP WHERE ID = ?",-1,&stmt,NULL)){
             printf("Erro SQL(%s) em:%s\n",sqlite3_errmsg(db),__func__);
             return -1;
         }
-        sqlite3_bind_text(stmt,1,__TIMESTAMP__,-1,NULL);//TIMESTAMP
-        sqlite3_bind_int(stmt,2,id_database_comanda);
+        sqlite3_bind_int(stmt,1,id_database_comanda);
         sqlite3_step(stmt);
         sqlite3_finalize(stmt);
         resetarComanda(&comandas[id_comanda]);
