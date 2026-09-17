@@ -1,5 +1,6 @@
 from ctypes import *
 import atexit
+import json
 libpub = CDLL('./libpub.so')
 from flask import Flask, render_template, request
 app = Flask(__name__)
@@ -16,6 +17,8 @@ libpub.resetarComanda.restype = None
 libpub.fecharComanda.argtypes = [c_int]
 libpub.renomearComanda.argtypes = [c_void_p, c_char_p, c_char_p]
 libpub.getComandaIndice.argtypes = [c_int]
+libpub.getComandaJSON.argtypes = [c_int]
+libpub.getComandaJSON.restype = c_char_p
 #CTYPES ARGTYPES COMANDA > encerrarSistema() | limpar memoria
 libpub.encerrarSistema.restype = None
 #CTYPES ARGTYPES CARDAPIO
@@ -58,6 +61,10 @@ def criar_comanda():
         libpub.criarComanda(request.form['Mesa'].encode("utf8"),request.form['Cliente'].encode("utf8"))
         return render_template("pages/comandas.html")
 
+@app.route("/get-comanda", methods['GET'])
+def get_comanda(id_database_comanda):
+    dados = json.loads(libpub.getComandaJSON(id_database_comanda).decode())
+    return dados
 
 # if __name__ == "__main__":
 #     app.run(debug=True)

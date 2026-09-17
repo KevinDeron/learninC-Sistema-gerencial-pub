@@ -33,13 +33,13 @@ void imprime(){
 
 int main (int argc, char *argv[]){
 
-    rc = sqlite3_open("data.db",&db);
-    if(rc){
-        fprintf(stderr, "Nao foi possivel abrir database: %s\n",sqlite3_errmsg(db));
-        return 0;
-    }else{
-        fprintf(stderr,"Database aberta com sucesso!\n");
-    }
+    // rc = sqlite3_open("data.db",&db);
+    // if(rc){
+    //     fprintf(stderr, "Nao foi possivel abrir database: %s\n",sqlite3_errmsg(db));
+    //     return 0;
+    // }else{
+    //     fprintf(stderr,"Database aberta com sucesso!\n");
+    // }
     int dbInicializada = initDB(db);
     if(dbInicializada == 0){
         fprintf(stderr, "Nao foi possivel inicializar a database!\n");

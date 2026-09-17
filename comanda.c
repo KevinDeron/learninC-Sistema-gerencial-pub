@@ -109,6 +109,7 @@ int adicionarItemComanda(int id_database_comanda, int quant, int id_database_ite
     // "(comanda_id = 1, item_id = 2, quantidade = 3, preco_unitario = 4) "
     if(sqlite3_prepare_v2(db,sql,-1,&stmt,NULL)){
         printf("Erro SQL(%s) em: %s\n",sqlite3_errmsg(db),__func__);
+        sqlite3_finalize(stmt);
         return -1;
     }
     sqlite3_bind_int(stmt,1,id_database_comanda);
@@ -139,12 +140,14 @@ int adicionarItemComanda(int id_database_comanda, int quant, int id_database_ite
         struct item *new_p = realloc(comandas[id_comanda].itensComanda,(comandas[id_comanda].quantidadeItens + 1) * sizeof(struct item));
         if(new_p == NULL){
             printf("Falha ao alocar memoria %s\n",__func__);
+            sqlite3_finalize(stmt);
             return -1;
         }
         comandas[id_comanda].itensComanda = new_p;
     }else{
         if((comandas[id_comanda].itensComanda = calloc(1,sizeof(struct item))) == NULL){
             printf("Erro ao alocar memoria em: %s\n",__func__);
+            sqlite3_finalize(stmt);
             return -1;
         }
     }
@@ -248,8 +251,7 @@ char *getComandaJSON(int id_database_comanda){
     sqlite3_bind_int(stmt,1,id_database_comanda);
     if(sqlite3_step(stmt) == SQLITE_ROW){
         sqlite3_str_appendf(JSON,"{");
-        int col = sqlite3_data_count(stmt);
-        for(int i = 0;i < sqlite3_data_count(stmt);i++){
+        for(int i = 0;i < sqlite3_column_count(stmt);i++){
             if(i > 0){
                 sqlite3_str_appendf(JSON,",");
             }
@@ -264,7 +266,7 @@ char *getComandaJSON(int id_database_comanda){
         sqlite3_str_appendf(JSON,"}");
     }
 
-    char *completeJSON = sqlite3_mprintf("%s",sqlite3_str_value(JSON));
+    char *completeJSON = sqlite3_mprintf("%z",sqlite3_str_value(JSON));
     sqlite3_str_finish(JSON);
     sqlite3_finalize(stmt);
     return completeJSON; 
