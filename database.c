@@ -56,8 +56,8 @@ int initDB(){
             "ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," \
             "mesa       TEXT," \
             "cliente    TEXT," \
-            "aberta_em  TIMESTAMP," \
-            "fechada_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);";
+            "aberta_em  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP," \
+            "fechada_em TIMESTAMP);";
     rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
 
     if(rc == SQLITE_OK){

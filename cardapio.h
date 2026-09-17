@@ -5,6 +5,7 @@
 extern int totalItensCardapio;
 
 struct item *getItensCardapio();
+int getItemCardapioIndice(int id_database_item);
 
 extern struct item *cardapio;
 
