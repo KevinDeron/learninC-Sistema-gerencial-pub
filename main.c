@@ -77,7 +77,9 @@ int main (int argc, char *argv[]){
     test = adicionarItemComanda(comandaN1, 1, chopp400, -1);
     if(test == -1){return 0;}
     calculaValorTotal(comandaN1);
-    
+
+    char *p = getComandaJSON(comandaN1);
+    printf("%s\n",p);
     comandaN2 = criarComanda(" ", "123test");
     if(comandaN2 == -1){return 0;}
 
@@ -100,9 +102,11 @@ int main (int argc, char *argv[]){
     //=============CLEANUP==================
     free(comandas);
     free(cardapio);
+    sqlite3_free(p);
 
     printf("Fechando database!\n");
     sqlite3_close(db);
     db = NULL;
+    p = NULL;
     return 0;
 };

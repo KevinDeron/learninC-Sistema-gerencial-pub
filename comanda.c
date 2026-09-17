@@ -242,13 +242,32 @@ int getComandaIndice(int id_database_comanda){
     return -1;
 }
 
-char *getComandasJSON(){
-    char *JSON;
-    // sqlite3_str
-    sqlite3_prepare_v2(db,"",-1,&stmt,NULL);
+char *getComandaJSON(int id_database_comanda){
+    sqlite3_str *JSON = sqlite3_str_new(db);
+    sqlite3_prepare_v2(db,"SELECT * FROM comandas WHERE fechada_em ISNULL AND ID == ?",-1,&stmt,NULL);
+    sqlite3_bind_int(stmt,1,id_database_comanda);
+    if(sqlite3_step(stmt) == SQLITE_ROW){
+        sqlite3_str_appendf(JSON,"{");
+        int col = sqlite3_data_count(stmt);
+        for(int i = 0;i < sqlite3_data_count(stmt);i++){
+            if(i > 0){
+                sqlite3_str_appendf(JSON,",");
+            }
+            sqlite3_str_appendf(JSON,"\"%s\":", sqlite3_column_name(stmt,i));
+            const char *valor = (const char *)sqlite3_column_text(stmt,i);
+            if(valor){
+                sqlite3_str_appendf(JSON,"\"%s\"",valor);
+            }else{
+                sqlite3_str_appendf(JSON,"\"NULL\"");
+            }
+        }
+        sqlite3_str_appendf(JSON,"}");
+    }
 
+    char *completeJSON = sqlite3_mprintf("%s",sqlite3_str_value(JSON));
+    sqlite3_str_finish(JSON);
     sqlite3_finalize(stmt);
-    return JSON; 
+    return completeJSON; 
 }
 
 void encerrarSistema(){
