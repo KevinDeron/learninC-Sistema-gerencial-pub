@@ -7,6 +7,7 @@
 </head>
 <body>
     {% include "components/navbar.html" %}
-    <main id="content">{% block content %}{% endblock %}</main>
+    {% include "pages/criarComanda.html" %}
+    {% block getComanda %}{% endblock %}
 </body>
 </html>

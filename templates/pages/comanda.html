@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block getComanda %}
+<div id="div-get-comandas">
+    <h1>Comanda 5 test</h1>
+    <ul>
+        {% for key, value in dados.items() %}
+            <li>{{ key }}: {{ value }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

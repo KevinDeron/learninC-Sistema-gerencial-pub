@@ -266,10 +266,11 @@ char *getComandaJSON(int id_database_comanda){
         sqlite3_str_appendf(JSON,"}");
     }
 
-    char *completeJSON = sqlite3_mprintf("%z",sqlite3_str_value(JSON));
-    sqlite3_str_finish(JSON);
+    char *completeJSON = sqlite3_str_finish(JSON);
+    // char *completeJSON = sqlite3_mprintf("%z",sqlite3_str_value(JSON));
+    // sqlite3_str_finish(JSON);
     sqlite3_finalize(stmt);
-    return completeJSON; 
+    return completeJSON;
 }
 
 void encerrarSistema(){

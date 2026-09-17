@@ -53,21 +53,25 @@ class item(Structure):
 
 @app.route("/")
 def home():
-    return render_template("pages/comandas.html")
+    return render_template("base.html")
 
 @app.route("/criar-comanda", methods=['POST'])
 def criar_comanda():
     if request.method == 'POST':
         libpub.criarComanda(request.form['Mesa'].encode("utf8"),request.form['Cliente'].encode("utf8"))
-        return render_template("pages/comandas.html")
+        return render_template("pages/criarComanda.html")
 
-@app.route("/get-comanda", methods['GET'])
-def get_comanda(id_database_comanda):
+@app.route("/get-comanda")
+def get_comanda():
+    id_database_comanda = 5
     dados = json.loads(libpub.getComandaJSON(id_database_comanda).decode())
-    return dados
+    context = {
+        "dados": dados,
+    }
+    return render_template("pages/comanda.html", **context)
 
-# if __name__ == "__main__":
-#     app.run(debug=True)
+if __name__ == "__main__":
+    app.run(debug=True)
     
 atexit.register(libpub.encerrarSistema)
     
