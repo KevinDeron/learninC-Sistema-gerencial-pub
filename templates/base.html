@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <link rel='stylesheet' href="{{ url_for('static',filename='css/styles.css') }}">
+    {# <meta name='viewport' content='width=device-width, initial-scale=1'> #}
+    <title>{% block title %}{% endblock %}Page Title</title>
+</head>
+<body>
+    {% include "components/navbar.html" %}
+    <main id="content">{% block content %}{% endblock %}</main>
+</body>
+</html>

@@ -17,32 +17,39 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
 
 int initDB(){
     zErrMsg = NULL;
+    rc = sqlite3_open("data.db",&db);
+    if(rc){
+        fprintf(stderr, "Nao foi possivel abrir database: %s\n",sqlite3_errmsg(db));
+        return 0;
+    }else{
+        fprintf(stderr,"Database aberta com sucesso!\n");
+    }
     if(!db){
         fprintf(stderr ,"NULL pointer passado para %s\n", __func__);
         return 1;
     }
     //======================DEBUG======================
-    sql = "DROP TABLE IF EXISTS itens";
-    rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
-    if(rc != SQLITE_OK){
-        fprintf(stderr, "Erro SQL: %s\n",zErrMsg);
-        sqlite3_free(zErrMsg);
-        return 0;
-    }
-    sql = "DROP TABLE IF EXISTS comandas";
-    rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
-    if(rc != SQLITE_OK){
-        fprintf(stderr, "Erro SQL: %s\n",zErrMsg);
-        sqlite3_free(zErrMsg);
-        return 0;
-    }
-    sql = "DROP TABLE IF EXISTS comanda_itens";
-    rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
-    if(rc != SQLITE_OK){
-        fprintf(stderr, "Erro SQL: %s\n",zErrMsg);
-        sqlite3_free(zErrMsg);
-        return 0;
-    }
+    // sql = "DROP TABLE IF EXISTS itens";
+    // rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+    // if(rc != SQLITE_OK){
+    //     fprintf(stderr, "Erro SQL: %s\n",zErrMsg);
+    //     sqlite3_free(zErrMsg);
+    //     return 0;
+    // }
+    // sql = "DROP TABLE IF EXISTS comandas";
+    // rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+    // if(rc != SQLITE_OK){
+    //     fprintf(stderr, "Erro SQL: %s\n",zErrMsg);
+    //     sqlite3_free(zErrMsg);
+    //     return 0;
+    // }
+    // sql = "DROP TABLE IF EXISTS comanda_itens";
+    // rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+    // if(rc != SQLITE_OK){
+    //     fprintf(stderr, "Erro SQL: %s\n",zErrMsg);
+    //     sqlite3_free(zErrMsg);
+    //     return 0;
+    // }
     //=================================================
     //Tabela comandas
     sql =   "CREATE TABLE IF NOT EXISTS comandas(" \

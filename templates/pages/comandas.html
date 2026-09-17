@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Comandas{% endblock %}
+
+{% block content %}
+<h1>COMANDAS</h1>
+<div id="div-criar-comanda">
+    <form action="/criar-comanda" method="post">
+        <p>
+            <label for="mesa">Mesa:</label>
+            <input type="text" name="Mesa" id="mesa">
+        </p>
+        <p>
+            <label for="cliente">Cliente:</label>
+            <input type="text" name="Cliente" id="cliente">
+        </p>
+        <p class="button">
+            <button type="submit">Criar Comanda</button>
+        </p>
+    </form>
+</div>
+{% endblock %}

@@ -10,7 +10,7 @@ int totalItens;
 int adicionarItem(char *nome, char *categoria, float preco){
     int id_database_item;
     if (strlen(nome) > 14){
-        printf("Nome do item maior que 15 caracteres");
+        printf("Nome do item maior que 15 caracteres\n");
         return -1;
     }    
     if(totalItens > 0){

@@ -23,6 +23,7 @@ void resetarComanda(struct comanda *comanda);
 int fecharComanda(int id_database_comanda);
 int renomearComanda(struct comanda *comanda, char *novoNomeMesa, char *novoNomeCliente);
 int getComandaIndice(int id_database_comanda);
+void encerrarSistema();
 
 extern struct comanda *comandas;
 extern struct item *itensComanda;

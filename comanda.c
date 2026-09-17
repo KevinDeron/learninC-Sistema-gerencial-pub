@@ -262,3 +262,12 @@ int getComandaIndice(int id_database_comanda){
     printf("Comanda nao existe![%s]\n",__func__);
     return -1;
 }
+
+void encerrarSistema(){
+    printf("Livrando memoria\n");
+    free(comandas);
+    free(cardapio);
+    printf("Fechando database\n");
+    sqlite3_close(db);
+    db = NULL;
+}
