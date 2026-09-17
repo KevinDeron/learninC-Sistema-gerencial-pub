@@ -31,8 +31,8 @@ libpub.initDB(None)
 # print(comandas)
 class comandas(Structure):
     _fields_ =  [("id_database_comanda",c_int),
-                 ("mesa",c_char_p),
-                 ("cliente",c_char_p),
+                 ("mesa",c_char * 15),
+                 ("cliente",c_char * 15),
                  ("valorTotal",c_float),
                  ("isLivre",c_int),
                  ("quantidadeItens",c_int),
@@ -41,8 +41,8 @@ class comandas(Structure):
 
 class item(Structure):
     _fields_ =  [("id_database_item",c_int),
-                 ("nome",c_char_p),
-                 ("categoria",c_char_p),
+                 ("nome",c_char * 15),
+                 ("categoria",c_char * 15),
                  ("quant",c_int),
                  ("preco",c_float),
                  ("isAtivo",c_int),
