@@ -242,6 +242,15 @@ int getComandaIndice(int id_database_comanda){
     return -1;
 }
 
+char *getComandasJSON(){
+    char *JSON;
+    // sqlite3_str
+    sqlite3_prepare_v2(db,"",-1,&stmt,NULL);
+
+    sqlite3_finalize(stmt);
+    return JSON; 
+}
+
 void encerrarSistema(){
     printf("Livrando memoria\n");
     free(comandas);

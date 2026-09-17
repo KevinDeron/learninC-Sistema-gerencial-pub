@@ -46,7 +46,7 @@ class item(Structure):
                  ("quant",c_int),
                  ("preco",c_float),
                  ("isAtivo",c_int),
-                 ]
+                ]
 
 @app.route("/")
 def home():
