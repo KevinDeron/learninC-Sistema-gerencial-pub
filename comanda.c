@@ -245,11 +245,16 @@ int getComandaIndice(int id_database_comanda){
     return -1;
 }
 
-char *getComandaJSON(int id_database_comanda){
+char *getComandasAbertasJSON(){
     sqlite3_str *JSON = sqlite3_str_new(db);
-    sqlite3_prepare_v2(db,"SELECT * FROM comandas WHERE fechada_em ISNULL AND ID == ?",-1,&stmt,NULL);
-    sqlite3_bind_int(stmt,1,id_database_comanda);
-    if(sqlite3_step(stmt) == SQLITE_ROW){
+    sqlite3_prepare_v2(db,"SELECT ID,mesa,cliente FROM comandas WHERE fechada_em ISNULL",-1,&stmt,NULL);
+    sqlite3_str_appendf(JSON,"[");
+    int PrimeiraLinha = 1; //bool
+    while(sqlite3_step(stmt) == SQLITE_ROW){
+        if(!PrimeiraLinha){
+            sqlite3_str_appendf(JSON,",");
+        }
+        PrimeiraLinha = 0;
         sqlite3_str_appendf(JSON,"{");
         for(int i = 0;i < sqlite3_column_count(stmt);i++){
             if(i > 0){
@@ -265,12 +270,75 @@ char *getComandaJSON(int id_database_comanda){
         }
         sqlite3_str_appendf(JSON,"}");
     }
-
+    sqlite3_str_appendf(JSON,"]");
     char *completeJSON = sqlite3_str_finish(JSON);
-    // char *completeJSON = sqlite3_mprintf("%z",sqlite3_str_value(JSON));
-    // sqlite3_str_finish(JSON);
+    printf("%s\n",completeJSON);
     sqlite3_finalize(stmt);
     return completeJSON;
+}
+
+char *getItensComandaJSON(int id_database_comanda){
+    sqlite3_str *JSON = sqlite3_str_new(db);
+    sql =   "SELECT ci.ID as id_lancamento,ci.quantidade,i.nome AS item,ci.preco_unitario " \
+            "FROM comanda_itens ci " \
+            "LEFT JOIN comandas c ON ci.comanda_id = c.id " \
+            "LEFT JOIN itens i ON ci.item_id = i.id " \
+            "WHERE fechada_em ISNULL AND comanda_id = ? AND ci.removido_em ISNULL;";
+    sqlite3_prepare_v2(db,sql,-1,&stmt,NULL);
+    sqlite3_bind_int(stmt,1,id_database_comanda);
+    sqlite3_str_appendf(JSON,"[");
+    int PrimeiraLinha = 1; //bool
+    while(sqlite3_step(stmt) == SQLITE_ROW){
+        if(!PrimeiraLinha){
+            sqlite3_str_appendf(JSON,",");
+        }
+        PrimeiraLinha = 0;
+        sqlite3_str_appendf(JSON,"{");
+        for(int i = 0;i < sqlite3_column_count(stmt);i++){
+            if(i > 0){
+                sqlite3_str_appendf(JSON,",");
+            }
+            sqlite3_str_appendf(JSON,"\"%s\":", sqlite3_column_name(stmt,i));
+            const char *valor = (const char *)sqlite3_column_text(stmt,i);
+            if(valor){
+                sqlite3_str_appendf(JSON,"\"%s\"",valor);
+            }else{
+                sqlite3_str_appendf(JSON,"\"NULL\"");
+            }
+        }
+        sqlite3_str_appendf(JSON,"}");
+    }
+    sqlite3_str_appendf(JSON,"]");
+    char *completeJSON = sqlite3_str_finish(JSON);
+    printf("%s\n",completeJSON);
+    sqlite3_finalize(stmt);
+    return completeJSON;
+}
+
+int atualizarItemLancamento(int id_lancamento, int quatidade, float preco_unitario){
+    sql = "UPDATE comanda_itens SET quantidade = ?, preco_unitario = ? WHERE ID = ?;";
+    if(sqlite3_prepare_v2(db,sql,-1,&stmt,NULL)){
+        printf("Erro SQL(%s) em:%s\n",sqlite3_errmsg(db),__func__);
+        return 0;
+    }
+    sqlite3_bind_int(   stmt,1,quatidade);
+    sqlite3_bind_double(stmt,2,preco_unitario);
+    sqlite3_bind_int(   stmt,3,id_lancamento);
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    return 1;
+}
+
+int removerItemLancamento(int id_lancamento){
+    sql = "UPDATE comanda_itens SET removido_em = CURRENT_TIMESTAMP WHERE id = ?;";
+    if(sqlite3_prepare_v2(db,sql,-1,&stmt,NULL)){
+        printf("Erro SQL(%s) em:%s\n",sqlite3_errmsg(db),__func__);
+        return 0;
+    }
+    sqlite3_bind_int(stmt,1,id_lancamento);
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    return 1;
 }
 
 void encerrarSistema(){

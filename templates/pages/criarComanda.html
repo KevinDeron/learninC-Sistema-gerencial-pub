@@ -1,16 +1,16 @@
-<h1>COMANDAS</h1>
-<div id="div-criar-comanda">
-    <form action="/criar-comanda" method="post">
-        <p>
-            <label for="mesa">Mesa:</label>
+<div class="criar-comanda-card">
+    <h1>Nova comanda</h1>
+    <form action="/criar-comanda" method="post" class="criar-comanda-form">
+        <p class="form-row">
+            <label for="mesa">Mesa</label>
             <input type="text" name="Mesa" id="mesa">
         </p>
-        <p>
-            <label for="cliente">Cliente:</label>
+        <p class="form-row">
+            <label for="cliente">Cliente</label>
             <input type="text" name="Cliente" id="cliente">
         </p>
-        <p class="button">
-            <button type="submit">Criar Comanda</button>
+        <p class="form-row form-row-button">
+            <button type="submit" class="btn-adicionar">Criar comanda</button>
         </p>
     </form>
 </div>

@@ -1,0 +1,355 @@
+:root {
+    --bg: #15120f;
+    --sidebar-bg: #1c1713;
+    --card-bg: #201a16;
+    --card-header-bg: #2b2119;
+    --border: #3a2c20;
+    --text: #ece3d6;
+    --text-muted: #9c8f7e;
+    --copper: #c1793f;
+    --gold: #d4af37;
+    --danger: #8b4a3b;
+    --radius: 3px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+h1, h2, h3 {
+    font-family: 'Bebas Neue', 'Inter', sans-serif;
+    letter-spacing: 0.02em;
+    margin: 0;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ---------- Sidebar ---------- */
+
+.sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+}
+
+.sidebar-brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--gold);
+    margin-bottom: 32px;
+}
+
+.sidebar-menu-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.sidebar-link:hover {
+    background: var(--card-header-bg);
+}
+
+.sidebar-link.is-active {
+    background: var(--card-header-bg);
+    color: var(--gold);
+    border-left: 2px solid var(--copper);
+}
+
+.sidebar-icon {
+    color: var(--copper);
+    font-size: 0.6rem;
+}
+
+/* ---------- Main content ---------- */
+
+.content {
+    flex: 1;
+    padding: 32px 40px;
+}
+
+.comandas-header {
+    margin-bottom: 24px;
+}
+
+.comandas-header h1 {
+    font-size: 2rem;
+}
+
+.comandas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.comandas-vazio {
+    color: var(--text-muted);
+}
+
+.comandas-footer {
+    margin-top: 24px;
+    text-align: right;
+}
+
+.btn-mais-mesas {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-mais-mesas:hover {
+    border-color: var(--copper);
+    color: var(--text);
+}
+
+/* ---------- Mesa card ---------- */
+
+.mesa-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.mesa-card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--card-header-bg);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    list-style: none;
+}
+
+.mesa-card-header::-webkit-details-marker {
+    display: none;
+}
+
+.mesa-card-header::after {
+    content: '+';
+    margin-left: auto;
+    padding-left: 8px;
+    color: var(--copper);
+}
+
+.mesa-card[open] .mesa-card-header::after {
+    content: '\2212'; /* minus */
+}
+
+.mesa-nome {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.03em;
+}
+
+.mesa-cliente {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.mesa-card.is-livre .mesa-nome {
+    color: var(--text-muted);
+}
+
+.mesa-card-body {
+    padding: 12px 14px;
+}
+
+.mesa-itens {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    border-top: 1px solid var(--border);
+}
+
+.mesa-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+}
+
+.item-quant-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-quant {
+    width: 22px;
+    height: 22px;
+    line-height: 1;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-quant:hover {
+    border-color: var(--copper);
+    color: var(--copper);
+}
+
+.item-quant-input {
+    width: 40px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius);
+    padding: 2px 4px;
+    text-align: center;
+}
+
+.item-nome {
+    flex: 1;
+}
+
+.item-preco-input {
+    width: 64px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: var(--radius);
+    padding: 2px 4px;
+    text-align: right;
+}
+
+.btn-confirmar-item {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.btn-confirmar-item:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.mesa-item.item-salvo {
+    background: rgba(212, 175, 55, 0.12);
+}
+
+.mesa-item.item-erro .item-quant-input,
+.mesa-item.item-erro .item-preco-input {
+    border-color: var(--danger);
+}
+
+.mesa-vazia {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin: 0 0 12px;
+}
+
+.mesa-erro {
+    color: var(--danger);
+    font-size: 0.85rem;
+    margin: 0 0 12px;
+}
+
+.mesa-card-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+}
+
+.mesa-action {
+    flex: 1;
+    margin: 0;
+}
+
+.btn-adicionar,
+.btn-fechar {
+    width: 100%;
+    padding: 8px 0;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.btn-adicionar {
+    background: var(--copper);
+    color: var(--bg);
+    border-color: var(--copper);
+}
+
+.btn-fechar {
+    background: none;
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+/* ---------- Criar comanda ---------- */
+
+.criar-comanda-card {
+    max-width: 320px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+}
+
+.form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0 0 12px;
+}
+
+.form-row label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.form-row input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: var(--radius);
+}
+
+.form-row-button {
+    margin-top: 4px;
+}

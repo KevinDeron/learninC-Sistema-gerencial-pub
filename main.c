@@ -78,7 +78,7 @@ int main (int argc, char *argv[]){
     if(test == -1){return 0;}
     calculaValorTotal(comandaN1);
 
-    char *p = getComandaJSON(comandaN1);
+    char *p = getComandasAbertasJSON();
     printf("%s\n",p);
     comandaN2 = criarComanda(" ", "123test");
     if(comandaN2 == -1){return 0;}
@@ -97,6 +97,8 @@ int main (int argc, char *argv[]){
     fecharComanda(comandaN1);
     fecharComanda(comandaN2);
     imprime();
+    char *s = getItensComandaJSON(comandaN1);
+    printf("%s\n",s);
 
     //============FIM DEBUG=================
     //=============CLEANUP==================

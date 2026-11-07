@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Mesas · Pico Beer{% endblock %}
+
+{% block content %}
+{# `comandas` vem de home(): json.loads(getComandasAbertasJSON()) - lista de
+   dicts com ID/mesa/cliente. Itens de cada uma sao carregados no navegador. #}
+
+<header class="comandas-header">
+    <h1>Mesas</h1>
+</header>
+
+<div class="comandas-grid">
+    {% for comanda in comandas %}
+        {% include "pages/comanda.html" %}
+    {% else %}
+        <p class="comandas-vazio">Nenhuma comanda aberta.</p>
+    {% endfor %}
+</div>
+
+<div class="comandas-footer">
+    <button type="button" class="btn-mais-mesas">
+        Mais mesas
+        <span class="btn-mais-mesas-arrow">&#9660;</span>
+    </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/comandas.js') }}" defer></script>
+{% endblock %}

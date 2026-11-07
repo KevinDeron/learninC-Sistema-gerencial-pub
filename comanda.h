@@ -22,7 +22,10 @@ void resetarComanda(struct comanda *comanda);
 int fecharComanda(int id_database_comanda);
 int renomearComanda(struct comanda *comanda, char *novoNomeMesa, char *novoNomeCliente);
 int getComandaIndice(int id_database_comanda);
-char *getComandaJSON(int id_database_comanda);
+char *getComandasAbertasJSON();
+char *getItensComandaJSON(int id_database_comanda);
+int atualizarItemLancamento(int id_lancamento, int quantidade, float preco_unitario);
+int removerItemLancamento(int id_lancamento);
 void encerrarSistema();
 
 extern struct comanda *comandas;

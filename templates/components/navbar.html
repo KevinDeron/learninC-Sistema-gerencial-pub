@@ -1,0 +1,23 @@
+<aside class="sidebar">
+    <div class="sidebar-brand">Pico Beer</div>
+
+    <nav class="sidebar-menu" aria-label="Menu principal">
+        <span class="sidebar-menu-label">Menu</span>
+
+        {# 'home' e a unica rota que existe hoje. Estoque/Financas ainda nao tem
+           view - troque os href="#" pelas rotas quando elas existirem. #}
+        <a href="{{ url_for('home') }}"
+           class="sidebar-link{{ ' is-active' if active_page == 'mesas' else '' }}">
+            <span class="sidebar-icon">&#9670;</span>
+            Mesas
+        </a>
+        <a href="#" class="sidebar-link{{ ' is-active' if active_page == 'estoque' else '' }}">
+            <span class="sidebar-icon">&#9670;</span>
+            Estoque
+        </a>
+        <a href="#" class="sidebar-link{{ ' is-active' if active_page == 'financas' else '' }}">
+            <span class="sidebar-icon">&#9670;</span>
+            Finanças
+        </a>
+    </nav>
+</aside>
