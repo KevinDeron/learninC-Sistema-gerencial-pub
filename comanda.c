@@ -216,12 +216,6 @@ void resetarComanda(struct comanda *comanda){
 // };
 
 int fecharComandaPorId(int id_database_comanda){
-    int id_comanda = getComandaIndice(id_database_comanda);
-    if(comandas[id_comanda].isLivre){
-        printf("Falha ao fechar mesa(Mesa Livre)\n");
-        return 0;
-    }
-    calculaValorTotal(id_database_comanda);
     sql = "UPDATE comandas SET fechada_em = CURRENT_TIMESTAMP WHERE ID = ? AND fechada_em ISNULL;";
     if(sqlite3_prepare_v2(db,sql,-1,&stmt,NULL)){
         printf("Erro SQL(%s) em:%s\n",sqlite3_errmsg(db),__func__);
@@ -230,7 +224,6 @@ int fecharComandaPorId(int id_database_comanda){
     sqlite3_bind_int(stmt,1,id_database_comanda);
     sqlite3_step(stmt);
     sqlite3_finalize(stmt);
-    resetarComanda(&comandas[id_comanda]);
     return 1;
 }
 
@@ -268,8 +261,8 @@ char *getComandasAbertasJSON(){
     sqlite3_prepare_v2(db,  "SELECT json_group_array(json_object('ID',ID,'mesa',mesa,'cliente',cliente))" \
                             "FROM comandas WHERE fechada_em ISNULL",-1,&stmt,NULL);    
     sqlite3_step(stmt);
-    char *completeJSON = sqlite3_mprintf(sqlite3_column_text(stmt,0));
-    printf("%s\n",completeJSON);
+    char *completeJSON = sqlite3_mprintf("%s",(const char *)sqlite3_column_text(stmt,0));
+    printf("%s\n",completeJSON); //debug
     sqlite3_finalize(stmt);
     return completeJSON;
 }
@@ -283,7 +276,7 @@ char *getItensComandaJSON(int id_database_comanda){
     sqlite3_prepare_v2(db,sql,-1,&stmt,NULL);
     sqlite3_bind_int(stmt,1,id_database_comanda);
     sqlite3_step(stmt);
-    char *completeJSON = sqlite3_mprintf(sqlite3_column_text(stmt,0));
+    char *completeJSON = sqlite3_mprintf("%s",(const char *)sqlite3_column_text(stmt,0));
     printf("%s\n",completeJSON); //debug
     sqlite3_finalize(stmt);
     return completeJSON;

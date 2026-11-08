@@ -57,3 +57,5 @@ pub
 .vscode
 *.db
 .venv
+__pycache__/
+CLAUDE.md
