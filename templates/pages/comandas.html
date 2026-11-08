@@ -15,12 +15,58 @@
     {% else %}
         <p class="comandas-vazio">Nenhuma comanda aberta.</p>
     {% endfor %}
+    {# sempre o ultimo item do grid, mesmo sem nenhuma comanda aberta #}
+    {% include "components/novaComanda.html" %}
 </div>
 
-<div class="comandas-footer">
-    <button type="button" class="btn-mais-mesas">
-        Mais mesas
-        <span class="btn-mais-mesas-arrow">&#9660;</span>
+{# Box flutuante do botao "Adicionar" de cada card: lista o cardapio (GET /cardapio),
+   busca, e cria o item se ele nao existir (POST /cardapio/itens). Um so para a pagina. #}
+<dialog class="box-cardapio" data-box-cardapio aria-labelledby="box-cardapio-titulo">
+    <div class="box-cardapio-conteudo">
+        <header class="box-cardapio-header">
+            <h2 id="box-cardapio-titulo" data-box-titulo>Adicionar</h2>
+            <button type="button" class="box-cardapio-fechar" data-fechar-box aria-label="Fechar">&times;</button>
+        </header>
+
+        <input type="search" class="box-cardapio-busca" data-busca maxlength="14"
+               placeholder="Buscar item ou digitar um novo…" aria-label="Buscar item"
+               autocomplete="off">
+
+        <p class="box-cardapio-status" data-status hidden></p>
+        <ul class="cardapio-lista" data-lista></ul>
+
+        <button type="button" class="btn-criar-item" data-criar-abrir hidden>
+            + Criar item “<span data-criar-nome></span>”
+        </button>
+
+        <form class="criar-item-form" data-criar-form autocomplete="off" hidden>
+            <p class="criar-item-titulo">Novo item: <strong data-criar-nome-form></strong></p>
+            <input type="text" name="categoria" maxlength="14" placeholder="Categoria" aria-label="Categoria">
+            <input type="number" name="preco" min="0" step="0.01" placeholder="Preço" aria-label="Preço" required>
+            <p class="criar-item-erro" data-criar-erro hidden></p>
+            <div class="criar-item-acoes">
+                <button type="submit" class="btn-renomear-salvar">Criar</button>
+                <button type="button" class="btn-renomear-cancelar" data-criar-cancelar>Cancelar</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+{# Engrenagem flutuante: abre/recolhe o balao de acoes (comandas.js) #}
+<div class="menu-flutuante" data-menu-flutuante>
+    <div class="menu-balao" id="menu-balao" role="menu" aria-label="Ações">
+        <button type="button" class="menu-balao-item" role="menuitem" data-acao="nova-comanda">
+            <span class="menu-balao-icone" aria-hidden="true">+</span>
+            Nova comanda
+        </button>
+    </div>
+    <button type="button" class="btn-engrenagem" aria-label="Configurações"
+            aria-haspopup="menu" aria-expanded="false" aria-controls="menu-balao">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
+        </svg>
     </button>
 </div>
 {% endblock %}

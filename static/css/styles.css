@@ -16,6 +16,11 @@
     box-sizing: border-box;
 }
 
+/* sem isto, um display:flex da classe vence o atributo hidden */
+[hidden] {
+    display: none !important;
+}
+
 body {
     margin: 0;
     background: var(--bg);
@@ -107,29 +112,125 @@ h1, h2, h3 {
 
 .comandas-vazio {
     color: var(--text-muted);
+    grid-column: 1 / -1; /* ocupa a linha toda, o card "Nova comanda" vai abaixo */
+    margin: 0;
 }
 
-.comandas-footer {
-    margin-top: 24px;
-    text-align: right;
+/* ---------- Menu flutuante (engrenagem + balao) ---------- */
+
+.content {
+    padding-bottom: 104px; /* o ultimo card nao fica escondido atras da engrenagem */
 }
 
-.btn-mais-mesas {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    padding: 8px 16px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    font-size: 0.85rem;
+.menu-flutuante {
+    position: fixed;
+    right: 28px;
+    bottom: 28px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.btn-engrenagem {
+    width: 56px;
+    height: 56px;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--copper);
+    background: var(--card-header-bg);
+    color: var(--copper);
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    transition: transform 0.3s ease, color 0.2s, background 0.2s;
 }
 
-.btn-mais-mesas:hover {
-    border-color: var(--copper);
+.btn-engrenagem:hover {
+    color: var(--gold);
+}
+
+.menu-flutuante.is-aberto .btn-engrenagem {
+    transform: rotate(90deg);
+    background: var(--copper);
+    color: var(--bg);
+}
+
+/* balao: recolhido = transparente, um pouco abaixo e sem receber clique */
+.menu-balao {
+    position: relative;
+    min-width: 190px;
+    padding: 6px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    transform-origin: bottom right;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px) scale(0.95);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
+}
+
+.menu-flutuante.is-aberto .menu-balao {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s;
+}
+
+/* "rabinho" do balao apontando para a engrenagem */
+.menu-balao::after {
+    content: '';
+    position: absolute;
+    right: 21px;
+    bottom: -7px;
+    width: 12px;
+    height: 12px;
+    background: var(--card-bg);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    transform: rotate(45deg);
+}
+
+.menu-balao-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border: none;
+    border-radius: var(--radius);
+    background: none;
     color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.menu-balao-item:hover,
+.menu-balao-item:focus-visible {
+    background: var(--card-header-bg);
+    color: var(--gold);
+    outline: none;
+}
+
+.menu-balao-icone {
+    width: 18px;
+    color: var(--copper);
+    font-size: 1.1rem;
+    line-height: 1;
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-engrenagem,
+    .menu-balao {
+        transition: none;
+    }
 }
 
 /* ---------- Mesa card ---------- */
@@ -165,6 +266,67 @@ h1, h2, h3 {
 
 .mesa-card[open] .mesa-card-header::after {
     content: '\2212'; /* minus */
+}
+
+.btn-editar-comanda {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    flex-shrink: 0;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.btn-editar-comanda:hover {
+    border-color: var(--copper);
+    color: var(--copper);
+}
+
+/* form de renomear: ocupa o lugar do cabecalho enquanto edita */
+.mesa-renomear {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 14px;
+    background: var(--card-header-bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.mesa-renomear input {
+    flex: 1 1 90px;
+    min-width: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 4px 8px;
+    border-radius: var(--radius);
+}
+
+.btn-renomear-salvar,
+.btn-renomear-cancelar {
+    padding: 4px 10px;
+    border-radius: var(--radius);
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.btn-renomear-salvar {
+    background: var(--copper);
+    color: var(--bg);
+    border: 1px solid var(--copper);
+}
+
+.btn-renomear-cancelar {
+    background: none;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
 }
 
 .mesa-nome {
@@ -376,4 +538,260 @@ h1, h2, h3 {
 
 .form-row-button {
     margin-top: 4px;
+}
+
+/* ---------- Card "Nova comanda" (sempre o ultimo do grid) ---------- */
+
+.nova-comanda-card {
+    background: var(--card-bg);
+    border: 1px dashed var(--copper);
+    border-radius: var(--radius);
+    align-self: start;
+}
+
+.nova-comanda-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.03em;
+    color: var(--copper);
+    cursor: pointer;
+    list-style: none;
+}
+
+.nova-comanda-header::-webkit-details-marker {
+    display: none;
+}
+
+.nova-comanda-plus {
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
+.nova-comanda-card:hover,
+.nova-comanda-card[open] {
+    border-style: solid;
+}
+
+.nova-comanda-card:hover .nova-comanda-header {
+    color: var(--gold);
+}
+
+.nova-comanda-card[open] .nova-comanda-header {
+    border-bottom: 1px solid var(--border);
+}
+
+.nova-comanda-body {
+    padding: 12px 14px;
+}
+
+/* ---------- Box do cardapio (botao "Adicionar") ---------- */
+
+.box-cardapio {
+    width: min(440px, calc(100vw - 32px));
+    max-height: min(580px, calc(100vh - 64px));
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* so quando aberto: senao venceria o display:none do <dialog> fechado */
+.box-cardapio[open] {
+    display: flex;
+    flex-direction: column;
+}
+
+.box-cardapio::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.box-cardapio-conteudo {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+}
+
+.box-cardapio-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.box-cardapio-header h2 {
+    font-size: 1.4rem;
+    color: var(--gold);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.box-cardapio-fechar {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    background: none;
+    color: var(--text-muted);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.box-cardapio-fechar:hover {
+    border-color: var(--border);
+    color: var(--text);
+}
+
+.box-cardapio-busca,
+.criar-item-form input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    font: inherit;
+}
+
+.box-cardapio-busca:focus,
+.criar-item-form input:focus {
+    outline: none;
+    border-color: var(--copper);
+}
+
+.box-cardapio-status {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.box-cardapio-status.is-erro {
+    color: var(--danger);
+}
+
+.cardapio-lista {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--border);
+}
+
+.cardapio-lista:empty {
+    display: none;
+}
+
+.cardapio-item {
+    width: 100%;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 9px 10px;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: none;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.cardapio-item:hover,
+.cardapio-item:focus-visible {
+    background: var(--card-header-bg);
+    outline: none;
+}
+
+.cardapio-item.is-selecionado {
+    background: rgba(212, 175, 55, 0.12);
+    box-shadow: inset 2px 0 0 var(--gold);
+}
+
+.cardapio-item-nome {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cardapio-item-categoria {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.cardapio-item-preco {
+    color: var(--copper);
+    font-variant-numeric: tabular-nums;
+}
+
+.btn-criar-item {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px dashed var(--copper);
+    border-radius: var(--radius);
+    background: none;
+    color: var(--copper);
+    font: inherit;
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn-criar-item:hover {
+    border-style: solid;
+    color: var(--gold);
+}
+
+.criar-item-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border: 1px dashed var(--copper);
+    border-radius: var(--radius);
+}
+
+.criar-item-titulo {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.criar-item-titulo strong {
+    color: var(--text);
+}
+
+.criar-item-erro {
+    margin: 0;
+    color: var(--danger);
+    font-size: 0.8rem;
+}
+
+.criar-item-acoes {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.criar-item-form input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
 }

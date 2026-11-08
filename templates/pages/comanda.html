@@ -4,11 +4,31 @@
    card e' aberto, via GET /comanda/<id>/itens -> getItensComandaJSON). #}
 <details open class="mesa-card" data-comanda-id="{{ comanda.ID }}">
     <summary class="mesa-card-header">
+        {# clique no lapis NAO abre/fecha o card (preventDefault em comandas.js) #}
+        <button type="button" class="btn-editar-comanda" data-editar
+                title="Renomear" aria-label="Renomear comanda">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 20h9"/>
+                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+            </svg>
+        </button>
         <span class="mesa-nome">{{ comanda.mesa }}</span>
         {% if comanda.cliente and comanda.cliente.strip() %}
             <span class="mesa-cliente">{{ comanda.cliente }}</span>
         {% endif %}
     </summary>
+
+    {# Fica fora do <summary>: espaco/Enter num input dentro dele abriria/fecharia o card.
+       Mostrado por comandas.js ao clicar no lapis. Basta mesa OU cliente. #}
+    <form class="mesa-renomear" data-renomear autocomplete="off" hidden>
+        <input type="text" name="Mesa" maxlength="14" placeholder="Mesa" aria-label="Mesa"
+               value="{{ comanda.mesa.strip() }}">
+        <input type="text" name="Cliente" maxlength="14" placeholder="Cliente" aria-label="Cliente"
+               value="{{ comanda.cliente.strip() if comanda.cliente else '' }}">
+        <button type="submit" class="btn-renomear-salvar">Salvar</button>
+        <button type="button" class="btn-renomear-cancelar" data-cancelar>Cancelar</button>
+    </form>
 
     <div class="mesa-card-body">
         {# comandas.js preenche isto no primeiro toggle do <details> #}
@@ -17,11 +37,11 @@
         </div>
 
         <div class="mesa-card-actions">
-            {# "Adicionar" ainda nao tem rota em app.py. "Fechar mesa" e tratado em
-               comandas.js: grava os itens pendentes, confirma e chama POST /comanda/<id>/fechar #}
-            <form action="/comanda/{{ comanda.ID }}/adicionar" method="post" class="mesa-action">
-                <button type="submit" class="btn-adicionar">Adicionar</button>
-            </form>
+            {# "Adicionar" abre o box do cardapio (comandas.js). "Fechar mesa" grava os
+               itens pendentes, confirma e chama POST /comanda/<id>/fechar #}
+            <div class="mesa-action">
+                <button type="button" class="btn-adicionar" data-adicionar>Adicionar</button>
+            </div>
             <div class="mesa-action">
                 <button type="button" class="btn-fechar" data-fechar>Fechar mesa</button>
             </div>

@@ -1,0 +1,23 @@
+{# Card fixo no fim do grid de comandas.html para abrir uma comanda nova.
+   Usa classe propria (nao .mesa-card) para o comandas.js ignorar este card.
+   maxlength 14: mesa/cliente sao char[15] na struct comanda do C.
+   Basta um dos dois campos (checado em comandas.js e no servidor). #}
+<details class="nova-comanda-card">
+    <summary class="nova-comanda-header">
+        <span class="nova-comanda-plus">+</span> Nova comanda
+    </summary>
+
+    <form action="/criar-comanda" method="post" class="nova-comanda-body" data-nova-comanda autocomplete="off">
+        <p class="form-row">
+            <label for="nova-mesa">Mesa</label>
+            <input type="text" name="Mesa" id="nova-mesa" maxlength="14">
+        </p>
+        <p class="form-row">
+            <label for="nova-cliente">Cliente</label>
+            <input type="text" name="Cliente" id="nova-cliente" maxlength="14">
+        </p>
+        <p class="form-row form-row-button">
+            <button type="submit" class="btn-adicionar">Criar comanda</button>
+        </p>
+    </form>
+</details>
