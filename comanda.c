@@ -82,7 +82,7 @@ int criarComanda(char *mesa, char *cliente){//YEAH, I KNOW, ITS UGLY, THIS HAS T
     return id_database_comanda;
 };
 
-float calculaValorTotal(int id_database_comanda){
+double calculaValorTotal(int id_database_comanda){
     float total = 0;
     int id_comanda = getComandaIndice(id_database_comanda);
     for(int i = 0;i < comandas[id_comanda].quantidadeItens;i++){
@@ -92,14 +92,14 @@ float calculaValorTotal(int id_database_comanda){
     return total;
 };
 
-int adicionarItemComanda(int id_database_comanda, int quant, int id_database_item,float preco){
+int adicionarItemComanda(int id_database_comanda, int quant, int id_database_item,double preco){
     int indiceN = 0;
     int indiceCardapio = -1;
     int id_comanda = getComandaIndice(id_database_comanda);
     if(id_comanda == -1){return -1;};
     if(comandas[id_comanda].isLivre){
         printf("Comanda esta livre![%s]\n",__func__);
-        return -1;
+        return 0;
     }
     indiceCardapio = getItemCardapioIndice(id_database_item);
     if(indiceCardapio == -1){return -1;};
@@ -110,7 +110,7 @@ int adicionarItemComanda(int id_database_comanda, int quant, int id_database_ite
     if(sqlite3_prepare_v2(db,sql,-1,&stmt,NULL)){
         printf("Erro SQL(%s) em: %s\n",sqlite3_errmsg(db),__func__);
         sqlite3_finalize(stmt);
-        return -1;
+        return 0;
     }
     sqlite3_bind_int(stmt,1,id_database_comanda);
     sqlite3_bind_int(stmt,2,id_database_item);
@@ -125,14 +125,14 @@ int adicionarItemComanda(int id_database_comanda, int quant, int id_database_ite
                         sqlite3_bind_double(stmt,4,preco);
                         sqlite3_step(stmt);
                         sqlite3_finalize(stmt);
-                        return 0;
+                        return 1;
                     }
                     comandas[id_comanda].itensComanda[indiceN].quant += quant;
                     sqlite3_bind_int(stmt,3,quant);
                     sqlite3_bind_double(stmt,4,preco);
                     sqlite3_step(stmt);
                     sqlite3_finalize(stmt);
-                    return 0;
+                    return 1;
                 }
             }
         }
@@ -141,14 +141,14 @@ int adicionarItemComanda(int id_database_comanda, int quant, int id_database_ite
         if(new_p == NULL){
             printf("Falha ao alocar memoria %s\n",__func__);
             sqlite3_finalize(stmt);
-            return -1;
+            return 0;
         }
         comandas[id_comanda].itensComanda = new_p;
     }else{
         if((comandas[id_comanda].itensComanda = calloc(1,sizeof(struct item))) == NULL){
             printf("Erro ao alocar memoria em: %s\n",__func__);
             sqlite3_finalize(stmt);
-            return -1;
+            return 0;
         }
     }
 
@@ -169,7 +169,7 @@ int adicionarItemComanda(int id_database_comanda, int quant, int id_database_ite
     comandas[id_comanda].quantidadeItens++;
     sqlite3_step(stmt);
     sqlite3_finalize(stmt);
-    return 0;
+    return 1;
 };
 
 void resetarComanda(struct comanda *comanda){
@@ -184,36 +184,55 @@ void resetarComanda(struct comanda *comanda){
     comanda->id_database_comanda = 0;
 };
 
-int fecharComanda(int id_database_comanda){
+// int fecharComanda(int id_database_comanda){
+//     int id_comanda = getComandaIndice(id_database_comanda);
+//     if(comandas[id_comanda].isLivre){
+//         printf("Falha ao fechar mesa[Mesa Livre]\n");
+//         return -1;
+//     }
+       
+//     printf("Comanda: %s(%s)\n", comandas[id_comanda].mesa, comandas[id_comanda].cliente);
+//     for (int i = 0; i < comandas[id_comanda].quantidadeItens; i++){
+//         printf("%d | %s | %0.2f\n", 
+//             comandas[id_comanda].itensComanda[i].quant, comandas[id_comanda].itensComanda[i].nome, comandas[id_comanda].itensComanda[i].preco);
+//     }
+//     calculaValorTotal(id_database_comanda);
+//     printf("Valor total: %0.2f\n", comandas[id_comanda].valorTotal);
+//     printf("Deseja fechar[s/n?[placeholder]\n");
+//     char r;
+//     scanf(" %c", &r);
+//     if(r == 's'){
+//         if(sqlite3_prepare_v2(db,"UPDATE comandas SET fechada_em = CURRENT_TIMESTAMP WHERE ID = ?",-1,&stmt,NULL)){
+//             printf("Erro SQL(%s) em:%s\n",sqlite3_errmsg(db),__func__);
+//             return -1;
+//         }
+//         sqlite3_bind_int(stmt,1,id_database_comanda);
+//         sqlite3_step(stmt);
+//         sqlite3_finalize(stmt);
+//         resetarComanda(&comandas[id_comanda]);
+//         return 0;
+//     }
+//     return 1;
+// };
+
+int fecharComandaPorId(int id_database_comanda){
     int id_comanda = getComandaIndice(id_database_comanda);
     if(comandas[id_comanda].isLivre){
-        printf("Falha ao fechar mesa[Mesa Livre]\n");
-        return -1;
-    }
-       
-    printf("Comanda: %s(%s)\n", comandas[id_comanda].mesa, comandas[id_comanda].cliente);
-    for (int i = 0; i < comandas[id_comanda].quantidadeItens; i++){
-        printf("%d | %s | %0.2f\n", 
-            comandas[id_comanda].itensComanda[i].quant, comandas[id_comanda].itensComanda[i].nome, comandas[id_comanda].itensComanda[i].preco);
-    }
-    calculaValorTotal(id_database_comanda);
-    printf("Valor total: %0.2f\n", comandas[id_comanda].valorTotal);
-    printf("Deseja fechar[s/n?[placeholder]\n");
-    char r;
-    scanf(" %c", &r);
-    if(r == 's'){
-        if(sqlite3_prepare_v2(db,"UPDATE comandas SET fechada_em = CURRENT_TIMESTAMP WHERE ID = ?",-1,&stmt,NULL)){
-            printf("Erro SQL(%s) em:%s\n",sqlite3_errmsg(db),__func__);
-            return -1;
-        }
-        sqlite3_bind_int(stmt,1,id_database_comanda);
-        sqlite3_step(stmt);
-        sqlite3_finalize(stmt);
-        resetarComanda(&comandas[id_comanda]);
+        printf("Falha ao fechar mesa(Mesa Livre)\n");
         return 0;
     }
+    calculaValorTotal(id_database_comanda);
+    sql = "UPDATE comandas SET fechada_em = CURRENT_TIMESTAMP WHERE ID = ? AND fechada_em ISNULL;";
+    if(sqlite3_prepare_v2(db,sql,-1,&stmt,NULL)){
+        printf("Erro SQL(%s) em:%s\n",sqlite3_errmsg(db),__func__);
+        return 0;
+    }
+    sqlite3_bind_int(stmt,1,id_database_comanda);
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    resetarComanda(&comandas[id_comanda]);
     return 1;
-};
+}
 
 int renomearComanda(struct comanda *comanda, char *novoNomeMesa, char *novoNomeCliente){
     // int id_comanda = getComandaIndice(id_database_comanda);
@@ -232,7 +251,7 @@ int renomearComanda(struct comanda *comanda, char *novoNomeMesa, char *novoNomeC
         return 1;
     }
     printf("Nome maior que %zu(-1) caracteres!\n", sizeof(comandas->cliente));
-    return -1;
+    return 0;
 };
 
 int getComandaIndice(int id_database_comanda){
@@ -246,76 +265,31 @@ int getComandaIndice(int id_database_comanda){
 }
 
 char *getComandasAbertasJSON(){
-    sqlite3_str *JSON = sqlite3_str_new(db);
-    sqlite3_prepare_v2(db,"SELECT ID,mesa,cliente FROM comandas WHERE fechada_em ISNULL",-1,&stmt,NULL);
-    sqlite3_str_appendf(JSON,"[");
-    int PrimeiraLinha = 1; //bool
-    while(sqlite3_step(stmt) == SQLITE_ROW){
-        if(!PrimeiraLinha){
-            sqlite3_str_appendf(JSON,",");
-        }
-        PrimeiraLinha = 0;
-        sqlite3_str_appendf(JSON,"{");
-        for(int i = 0;i < sqlite3_column_count(stmt);i++){
-            if(i > 0){
-                sqlite3_str_appendf(JSON,",");
-            }
-            sqlite3_str_appendf(JSON,"\"%s\":", sqlite3_column_name(stmt,i));
-            const char *valor = (const char *)sqlite3_column_text(stmt,i);
-            if(valor){
-                sqlite3_str_appendf(JSON,"\"%s\"",valor);
-            }else{
-                sqlite3_str_appendf(JSON,"\"NULL\"");
-            }
-        }
-        sqlite3_str_appendf(JSON,"}");
-    }
-    sqlite3_str_appendf(JSON,"]");
-    char *completeJSON = sqlite3_str_finish(JSON);
+    sqlite3_prepare_v2(db,  "SELECT json_group_array(json_object('ID',ID,'mesa',mesa,'cliente',cliente))" \
+                            "FROM comandas WHERE fechada_em ISNULL",-1,&stmt,NULL);    
+    sqlite3_step(stmt);
+    char *completeJSON = sqlite3_mprintf(sqlite3_column_text(stmt,0));
     printf("%s\n",completeJSON);
     sqlite3_finalize(stmt);
     return completeJSON;
 }
 
 char *getItensComandaJSON(int id_database_comanda){
-    sqlite3_str *JSON = sqlite3_str_new(db);
-    sql =   "SELECT ci.ID as id_lancamento,ci.quantidade,i.nome AS item,ci.preco_unitario " \
+    sql =   "SELECT json_group_array(json_object('id_lancamento',ci.ID,'quantidade',ci.quantidade,'item',i.nome,'preco_unitario',ci.preco_unitario))"
             "FROM comanda_itens ci " \
             "LEFT JOIN comandas c ON ci.comanda_id = c.id " \
             "LEFT JOIN itens i ON ci.item_id = i.id " \
             "WHERE fechada_em ISNULL AND comanda_id = ? AND ci.removido_em ISNULL;";
     sqlite3_prepare_v2(db,sql,-1,&stmt,NULL);
     sqlite3_bind_int(stmt,1,id_database_comanda);
-    sqlite3_str_appendf(JSON,"[");
-    int PrimeiraLinha = 1; //bool
-    while(sqlite3_step(stmt) == SQLITE_ROW){
-        if(!PrimeiraLinha){
-            sqlite3_str_appendf(JSON,",");
-        }
-        PrimeiraLinha = 0;
-        sqlite3_str_appendf(JSON,"{");
-        for(int i = 0;i < sqlite3_column_count(stmt);i++){
-            if(i > 0){
-                sqlite3_str_appendf(JSON,",");
-            }
-            sqlite3_str_appendf(JSON,"\"%s\":", sqlite3_column_name(stmt,i));
-            const char *valor = (const char *)sqlite3_column_text(stmt,i);
-            if(valor){
-                sqlite3_str_appendf(JSON,"\"%s\"",valor);
-            }else{
-                sqlite3_str_appendf(JSON,"\"NULL\"");
-            }
-        }
-        sqlite3_str_appendf(JSON,"}");
-    }
-    sqlite3_str_appendf(JSON,"]");
-    char *completeJSON = sqlite3_str_finish(JSON);
-    printf("%s\n",completeJSON);
+    sqlite3_step(stmt);
+    char *completeJSON = sqlite3_mprintf(sqlite3_column_text(stmt,0));
+    printf("%s\n",completeJSON); //debug
     sqlite3_finalize(stmt);
     return completeJSON;
 }
 
-int atualizarItemLancamento(int id_lancamento, int quatidade, float preco_unitario){
+int atualizarItemLancamento(int id_lancamento, int quatidade, double preco_unitario){
     sql = "UPDATE comanda_itens SET quantidade = ?, preco_unitario = ? WHERE ID = ?;";
     if(sqlite3_prepare_v2(db,sql,-1,&stmt,NULL)){
         printf("Erro SQL(%s) em:%s\n",sqlite3_errmsg(db),__func__);

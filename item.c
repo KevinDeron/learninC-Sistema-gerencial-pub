@@ -50,10 +50,10 @@ int setItemAtivo(int id_database_item, int isAtivo){
     if(sqlite3_prepare_v2(db,"INSERT itens SET isAtivo = ? WHERE id == ?",-1,&stmt,NULL)){
         printf("Erro SQL(%s) em: %s\n",sqlite3_errmsg(db),__func__);
         sqlite3_finalize(stmt);
-        return -1;
+        return 0;
     }
     sqlite3_bind_int(stmt,1,isAtivo);
     sqlite3_bind_int(stmt,2,id_database_item);
     sqlite3_finalize(stmt);
-    return 0;
+    return 1;
 }

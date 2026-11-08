@@ -17,14 +17,14 @@
         </div>
 
         <div class="mesa-card-actions">
-            {# Rotas de adicionar item / fechar mesa ainda nao existem em app.py -
-               troque essas actions quando existirem. #}
+            {# "Adicionar" ainda nao tem rota em app.py. "Fechar mesa" e tratado em
+               comandas.js: grava os itens pendentes, confirma e chama POST /comanda/<id>/fechar #}
             <form action="/comanda/{{ comanda.ID }}/adicionar" method="post" class="mesa-action">
                 <button type="submit" class="btn-adicionar">Adicionar</button>
             </form>
-            <form action="/comanda/{{ comanda.ID }}/fechar" method="post" class="mesa-action">
-                <button type="submit" class="btn-fechar">Fechar mesa</button>
-            </form>
+            <div class="mesa-action">
+                <button type="button" class="btn-fechar" data-fechar>Fechar mesa</button>
+            </div>
         </div>
     </div>
 </details>

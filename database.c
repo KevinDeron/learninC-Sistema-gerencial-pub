@@ -15,6 +15,8 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
    return 0;
 }
 
+void liberarString(void *p){ sqlite3_free(p); }
+
 int initDB(){
     zErrMsg = NULL;
     rc = sqlite3_open("data.db",&db);

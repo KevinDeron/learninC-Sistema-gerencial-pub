@@ -16,15 +16,16 @@ struct comanda
 
 int setIniciarComandas();
 int criarComanda(char *mesa, char *cliente);
-float calculaValorTotal(int id_database_comanda);
-int adicionarItemComanda(int id_database_comanda, int quant, int id_database_item, float preco);
+double calculaValorTotal(int id_database_comanda);
+int adicionarItemComanda(int id_database_comanda, int quant, int id_database_item, double preco);
 void resetarComanda(struct comanda *comanda);
-int fecharComanda(int id_database_comanda);
+// int fecharComanda(int id_database_comanda);
+int fecharComandaPorId(int id_database_comanda);
 int renomearComanda(struct comanda *comanda, char *novoNomeMesa, char *novoNomeCliente);
 int getComandaIndice(int id_database_comanda);
 char *getComandasAbertasJSON();
 char *getItensComandaJSON(int id_database_comanda);
-int atualizarItemLancamento(int id_lancamento, int quantidade, float preco_unitario);
+int atualizarItemLancamento(int id_lancamento, int quantidade, double preco_unitario);
 int removerItemLancamento(int id_lancamento);
 void encerrarSistema();
 

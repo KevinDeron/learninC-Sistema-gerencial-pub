@@ -101,7 +101,7 @@ h1, h2, h3 {
 
 .comandas-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 16px;
 }
 
@@ -196,7 +196,7 @@ h1, h2, h3 {
 .mesa-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     padding: 6px 0;
     border-bottom: 1px solid var(--border);
     font-size: 0.9rem;
@@ -225,44 +225,68 @@ h1, h2, h3 {
     color: var(--copper);
 }
 
-.item-quant-input {
-    width: 40px;
+.item-quant-input,
+.item-preco-input {
     background: var(--bg);
     border: 1px solid var(--border);
-    color: var(--text);
     border-radius: var(--radius);
     padding: 2px 4px;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* remove as setinhas internas do <input type="number"> */
+.item-quant-input::-webkit-outer-spin-button,
+.item-quant-input::-webkit-inner-spin-button,
+.item-preco-input::-webkit-outer-spin-button,
+.item-preco-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.item-quant-input {
+    width: 38px;
+    color: var(--text);
     text-align: center;
 }
 
 .item-nome {
     flex: 1;
+    min-width: 0;            /* deixa o flex encolher o nome em vez de estourar a linha */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* nome muito grande vira "Chopp artes..." */
 }
 
 .item-preco-input {
     width: 64px;
-    background: var(--bg);
-    border: 1px solid var(--border);
     color: var(--text-muted);
-    border-radius: var(--radius);
-    padding: 2px 4px;
     text-align: right;
 }
 
-.btn-confirmar-item {
-    width: 24px;
-    height: 24px;
+.btn-remover-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
     border-radius: var(--radius);
-    border: 1px solid var(--border);
+    border: 1px solid transparent;
     background: none;
     color: var(--text-muted);
     cursor: pointer;
-    line-height: 1;
 }
 
-.btn-confirmar-item:hover {
-    border-color: var(--gold);
-    color: var(--gold);
+.btn-remover-item:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+/* alteracao ainda nao gravada (o autosave grava em ate 5s) */
+.mesa-item.item-sujo .item-quant-input,
+.mesa-item.item-sujo .item-preco-input {
+    border-color: var(--copper);
 }
 
 .mesa-item.item-salvo {

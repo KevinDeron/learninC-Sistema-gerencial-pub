@@ -7,6 +7,7 @@ extern int rc;
 extern char *zErrMsg;
 extern char *sql;
 
+void liberarString(void *p);
 int initDB(sqlite3 *db);
 
 #endif
