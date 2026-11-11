@@ -6,45 +6,16 @@
 #include "item.h"
 #include "cardapio.h"
 
-int totalItensCardapio = 0;
-struct item *cardapio;
-
-struct item *getItensCardapio(){
-    int indiceN = 0;
-    char *c;
-    rc = sqlite3_prepare_v2(db,"SELECT ID,nome,categoria,preco FROM itens WHERE isAtivo == 1",-1,&stmt,NULL);
-    if(rc){
+char *getItensCardapioJSON(){
+    sqlite3_stmt *stmt;
+    if(sqlite3_prepare_v2(db,"SELECT json_Group_array(json_object('ID',ID,'nome',nome,'categoria',categoria,'preco',preco)) FROM itens WHERE isAtivo == 1;",-1,&stmt,NULL)){
         printf("Erro SQL(%s) em: %s\n",sqlite3_errmsg(db),__func__);
         sqlite3_finalize(stmt);
-        return NULL;
+        return 0;
     }
-    while(sqlite3_step(stmt) == SQLITE_ROW){
-        struct item *new_p = realloc(cardapio,(indiceN + 1) * sizeof(struct item));
-        if(new_p == NULL){
-            printf("Falha ao alocar memoria[%s]\n", __func__);
-            sqlite3_finalize(stmt);
-            return NULL;
-        }
-        cardapio = new_p;
-        cardapio[indiceN].id_database_item = sqlite3_column_int(stmt,0);
-        c = sqlite3_column_text(stmt,1);
-            strcpy(cardapio[indiceN].nome,c);
-        c = sqlite3_column_text(stmt,2);
-            strcpy(cardapio[indiceN].categoria,c);
-        cardapio[indiceN].preco = sqlite3_column_double(stmt,3);
-        indiceN++;
-    }
-    totalItensCardapio = indiceN;
+    sqlite3_step(stmt);
+    char *cardapioJSON = sqlite3_mprintf("%s",(const char *)sqlite3_column_text(stmt,0));
+    printf("%s\n",cardapioJSON); //debug
     sqlite3_finalize(stmt);
-    return cardapio;
-}
-
-int getItemCardapioIndice(int id_database_item){
-    for (int indiceN = 0;indiceN < totalItensCardapio; indiceN++){
-        if(cardapio[indiceN].id_database_item == id_database_item){
-            return indiceN;
-        }
-    }
-    printf("Item nao existe![%s]\n",__func__);
-    return -1;
+    return cardapioJSON;
 }

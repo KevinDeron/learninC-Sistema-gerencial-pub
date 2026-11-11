@@ -4,7 +4,16 @@
    card e' aberto, via GET /comanda/<id>/itens -> getItensComandaJSON). #}
 <details open class="mesa-card" data-comanda-id="{{ comanda.ID }}">
     <summary class="mesa-card-header">
-        {# clique no lapis NAO abre/fecha o card (preventDefault em comandas.js) #}
+        {# alca: arrastar (mouse ou toque) ou setas do teclado mudam o card de lugar.
+           Clique nela e no lapis NAO abre/fecha o card (preventDefault em comandas.js) #}
+        <button type="button" class="btn-arrastar-card" data-arrastar
+                title="Arraste para mudar de lugar" aria-label="Mover comanda (use as setas)">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                <circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/>
+                <circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/>
+                <circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/>
+            </svg>
+        </button>
         <button type="button" class="btn-editar-comanda" data-editar
                 title="Renomear" aria-label="Renomear comanda">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"

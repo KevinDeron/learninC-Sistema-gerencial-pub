@@ -31,6 +31,7 @@
         <input type="search" class="box-cardapio-busca" data-busca maxlength="14"
                placeholder="Buscar item ou digitar um novo…" aria-label="Buscar item"
                autocomplete="off">
+        <p class="box-cardapio-dica">↑↓ escolhe · Enter ou + lança · Esc fecha</p>
 
         <p class="box-cardapio-status" data-status hidden></p>
         <ul class="cardapio-lista" data-lista></ul>
@@ -52,12 +53,50 @@
     </div>
 </dialog>
 
+{# Box "Novo item" (menu da engrenagem): cadastra no cardapio sem lancar em comanda.
+   Enter em qualquer campo envia (submit nativo do form). POST /cardapio/itens #}
+<dialog class="box-cardapio box-novo-item" data-box-novo-item aria-labelledby="box-novo-item-titulo">
+    <form class="box-cardapio-conteudo" data-novo-item-form autocomplete="off">
+        <header class="box-cardapio-header">
+            <h2 id="box-novo-item-titulo">Novo item no cardápio</h2>
+            <button type="button" class="box-cardapio-fechar" data-fechar-novo-item aria-label="Fechar">&times;</button>
+        </header>
+
+        <p class="form-row">
+            <label for="novo-item-nome">Nome</label>
+            <input type="text" name="nome" id="novo-item-nome" maxlength="14" required>
+        </p>
+        <p class="form-row">
+            <label for="novo-item-categoria">Categoria</label>
+            <input type="text" name="categoria" id="novo-item-categoria" maxlength="14"
+                   list="categorias-cardapio">
+            <datalist id="categorias-cardapio"></datalist>
+        </p>
+        <p class="form-row">
+            <label for="novo-item-preco">Preço (R$)</label>
+            <input type="number" name="preco" id="novo-item-preco" min="0" step="0.01" required>
+        </p>
+
+        <p class="box-cardapio-status" data-novo-item-status hidden></p>
+
+        <div class="criar-item-acoes">
+            <button type="button" class="btn-renomear-cancelar" data-fechar-novo-item>Fechar</button>
+            <button type="submit" class="btn-renomear-salvar">Cadastrar</button>
+        </div>
+        <p class="box-cardapio-dica">Enter cadastra · Esc fecha</p>
+    </form>
+</dialog>
+
 {# Engrenagem flutuante: abre/recolhe o balao de acoes (comandas.js) #}
 <div class="menu-flutuante" data-menu-flutuante>
     <div class="menu-balao" id="menu-balao" role="menu" aria-label="Ações">
         <button type="button" class="menu-balao-item" role="menuitem" data-acao="nova-comanda">
             <span class="menu-balao-icone" aria-hidden="true">+</span>
             Nova comanda
+        </button>
+        <button type="button" class="menu-balao-item" role="menuitem" data-acao="novo-item">
+            <span class="menu-balao-icone" aria-hidden="true">&#9733;</span>
+            Novo item no cardápio
         </button>
     </div>
     <button type="button" class="btn-engrenagem" aria-label="Configurações"

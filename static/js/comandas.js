@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     iniciarMenuFlutuante();
     iniciarBoxCardapio();
+    iniciarBoxNovoItem();
 
     const formNova = document.querySelector('[data-nova-comanda]');
     if (formNova) {
@@ -65,6 +66,8 @@ function iniciarCard(card) {
     if (botaoAdicionar) {
         botaoAdicionar.addEventListener('click', () => abrirBoxCardapio(card));
     }
+
+    iniciarArrastarCard(card);
 
     const botaoEditar = card.querySelector('[data-editar]');
     const formRenomear = card.querySelector('[data-renomear]');
@@ -610,6 +613,8 @@ function iniciarMenuFlutuante() {
             definirAberto(false);
             if (item.dataset.acao === 'nova-comanda') {
                 abrirCardNovaComanda();
+            } else if (item.dataset.acao === 'novo-item') {
+                abrirBoxNovoItem();
             }
         });
     });
@@ -627,7 +632,9 @@ function abrirCardNovaComanda() {
 }
 
 // ---------------------------------------------------------------------
-// Box do cardapio (botao "Adicionar"): lista, busca, cria item novo
+// Box do cardapio (botao "Adicionar" do card)
+//   digitar filtra | setas escolhem | Enter ou clique lanca na comanda
+//   nome que nao existe -> "Criar item" (cadastra e ja lanca)
 // ---------------------------------------------------------------------
 
 const boxCardapio = {
@@ -635,6 +642,8 @@ const boxCardapio = {
     card: null,       // card da comanda que abriu o box
     itens: [],        // cardapio vindo de GET /cardapio
     carregado: false, // so oferece "criar" depois de saber o que ja existe
+    ativo: -1,        // posicao escolhida pelas setas; == filtrados.length -> "Criar item"
+    lancando: false,  // evita lancar duas vezes com Enter repetido
 };
 
 // minusculo e sem acento: "Pão" acha "pao"
@@ -648,6 +657,30 @@ function formatarPreco(valor) {
 
 function elBox(seletor) {
     return boxCardapio.dialog.querySelector(seletor);
+}
+
+// GET /cardapio -> lista de itens ativos {ID, nome, categoria, preco}
+async function buscarCardapio() {
+    const resposta = await naFila(() => fetch('/cardapio'));
+    const corpo = await resposta.json().catch(() => null);
+    if (!resposta.ok || !Array.isArray(corpo)) {
+        throw new Error((corpo && corpo.erro) || `HTTP ${resposta.status}`);
+    }
+    return corpo;
+}
+
+// POST /cardapio/itens -> item criado {ID, nome, categoria, preco}
+async function cadastrarItem(nome, categoria, preco) {
+    const resposta = await naFila(() => fetch('/cardapio/itens', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, categoria, preco }),
+    }));
+    const corpo = await resposta.json().catch(() => ({}));
+    if (!resposta.ok) {
+        throw new Error(corpo.erro || `HTTP ${resposta.status}`);
+    }
+    return corpo;
 }
 
 function iniciarBoxCardapio() {
@@ -666,6 +699,9 @@ function iniciarBoxCardapio() {
         if (ev.key === 'Enter') {
             ev.preventDefault();
             enterNaBusca();
+        } else if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+            ev.preventDefault();
+            moverAtivo(ev.key === 'ArrowDown' ? 1 : -1);
         }
     });
 
@@ -714,27 +750,25 @@ async function abrirBoxCardapio(card) {
     busca.focus();
 
     try {
-        const resposta = await naFila(() => fetch('/cardapio'));
-        const corpo = await resposta.json().catch(() => null);
-        if (!resposta.ok || !Array.isArray(corpo)) {
-            throw new Error((corpo && corpo.erro) || `HTTP ${resposta.status}`);
-        }
+        const itens = await buscarCardapio();
         if (boxCardapio.card !== card) {
             return; // o box ja foi reaberto para outro card
         }
-        boxCardapio.itens = corpo;
+        boxCardapio.itens = itens;
         boxCardapio.carregado = true;
         renderCardapio();
     } catch (erro) {
         console.error('Falha ao carregar cardapio', erro);
-        mostrarStatusCardapio(`Não foi possível carregar o cardápio: ${erro.message}`, true);
+        mostrarStatusCardapio(`Não foi possível carregar o cardápio: ${erro.message}`, 'erro');
     }
 }
 
-function mostrarStatusCardapio(texto, erro = false) {
+// tipo: '' (neutro), 'erro' ou 'ok'
+function mostrarStatusCardapio(texto, tipo = '') {
     const status = elBox('[data-status]');
     status.textContent = texto;
-    status.classList.toggle('is-erro', erro);
+    status.classList.toggle('is-erro', tipo === 'erro');
+    status.classList.toggle('is-ok', tipo === 'ok');
     status.hidden = !texto;
 }
 
@@ -747,6 +781,29 @@ function itensFiltrados() {
         normalizar(item.nome).includes(termo) || normalizar(item.categoria).includes(termo));
 }
 
+const SEM_CATEGORIA = 'Sem categoria';
+
+function categoriaDe(item) {
+    return (item.categoria || '').trim() || SEM_CATEGORIA;
+}
+
+// Filtrados na ordem em que aparecem na tela: categorias em ordem alfabetica
+// ("Sem categoria" por ultimo) e, dentro delas, itens por nome. As setas e o
+// Enter usam esta mesma ordem, entao o indice "ativo" bate com a tela.
+function itensEmOrdem() {
+    const comparar = (a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' });
+    return [...itensFiltrados()].sort((a, b) => {
+        const ca = categoriaDe(a);
+        const cb = categoriaDe(b);
+        if (ca !== cb) {
+            if (ca === SEM_CATEGORIA) return 1;
+            if (cb === SEM_CATEGORIA) return -1;
+            return comparar(ca, cb);
+        }
+        return comparar(a.nome, b.nome);
+    });
+}
+
 function existeItemComNome(nome) {
     const alvo = normalizar(nome);
     return boxCardapio.itens.some((item) => normalizar(item.nome) === alvo);
@@ -757,19 +814,31 @@ function podeCriarItem() {
     return boxCardapio.carregado && texto !== '' && !existeItemComNome(texto);
 }
 
-function renderCardapio() {
+// manterStatus: nao apaga a mensagem "lancado" logo depois de lancar
+function renderCardapio({ manterStatus = false } = {}) {
     const lista = elBox('[data-lista]');
     const texto = elBox('[data-busca]').value.trim();
-    const filtrados = itensFiltrados();
+    const filtrados = itensEmOrdem();
 
     lista.innerHTML = '';
-    filtrados.forEach((item) => lista.appendChild(criarLinhaCardapio(item)));
+    let categoriaAtual = null;
+    filtrados.forEach((item) => {
+        const categoria = categoriaDe(item);
+        if (categoria !== categoriaAtual) {
+            categoriaAtual = categoria;
+            const titulo = document.createElement('li');
+            titulo.className = 'cardapio-categoria';
+            titulo.textContent = categoria;
+            lista.appendChild(titulo);
+        }
+        lista.appendChild(criarLinhaCardapio(item));
+    });
 
-    if (boxCardapio.carregado) {
+    if (boxCardapio.carregado && !manterStatus) {
         if (boxCardapio.itens.length === 0 && !texto) {
             mostrarStatusCardapio('Cardápio vazio. Digite um nome para criar o primeiro item.');
-        } else if (filtrados.length === 0) {
-            mostrarStatusCardapio('Nenhum item encontrado.');
+        } else if (filtrados.length === 0 && texto) {
+            mostrarStatusCardapio('Nenhum item encontrado. Enter cria um novo.');
         } else {
             mostrarStatusCardapio('');
         }
@@ -779,57 +848,143 @@ function renderCardapio() {
     const formAberto = !elBox('[data-criar-form]').hidden;
     btnCriar.hidden = formAberto || !podeCriarItem();
     elBox('[data-criar-nome]').textContent = texto;
+
+    // Com texto digitado, o primeiro resultado ja vem escolhido (Enter lanca).
+    // Sem texto, nada escolhido: Enter sozinho nao lanca nada por engano.
+    boxCardapio.ativo = texto && filtrados.length > 0 ? 0 : -1;
+    marcarAtivo();
 }
 
-// [nome .......... categoria   R$ 0,00]
+// Opcoes navegaveis com as setas: os itens visiveis + "Criar item" (se aparecer)
+function opcoesNavegaveis() {
+    const opcoes = Array.from(elBox('[data-lista]').querySelectorAll('.cardapio-item'));
+    const btnCriar = elBox('[data-criar-abrir]');
+    if (!btnCriar.hidden) {
+        opcoes.push(btnCriar);
+    }
+    return opcoes;
+}
+
+function moverAtivo(passo) {
+    const total = opcoesNavegaveis().length;
+    if (total === 0) {
+        return;
+    }
+    const atual = boxCardapio.ativo;
+    boxCardapio.ativo = atual < 0
+        ? (passo > 0 ? 0 : total - 1)
+        : (atual + passo + total) % total;
+    marcarAtivo();
+}
+
+function marcarAtivo() {
+    opcoesNavegaveis().forEach((el, i) => {
+        const ativo = i === boxCardapio.ativo;
+        el.classList.toggle('is-ativo', ativo);
+        if (ativo) {
+            el.scrollIntoView({ block: 'nearest' });
+        }
+    });
+}
+
+// [nome ..................  R$ 0,00  (+)]
+// Clicar na linha so marca (como as setas); quem lanca e o "+" ou o Enter.
 function criarLinhaCardapio(item) {
     const li = document.createElement('li');
-
-    const botao = document.createElement('button');
-    botao.type = 'button';
-    botao.className = 'cardapio-item';
-    botao.dataset.idItem = item.ID;
+    li.className = 'cardapio-item';
+    li.dataset.idItem = item.ID;
 
     const nome = document.createElement('span');
     nome.className = 'cardapio-item-nome';
     nome.textContent = item.nome;
     nome.title = item.nome;
 
-    const categoria = document.createElement('span');
-    categoria.className = 'cardapio-item-categoria';
-    categoria.textContent = item.categoria || '';
-
     const preco = document.createElement('span');
     preco.className = 'cardapio-item-preco';
     preco.textContent = formatarPreco(item.preco);
 
-    botao.append(nome, categoria, preco);
-    botao.addEventListener('click', () => selecionarItemCardapio(item, botao));
-    li.appendChild(botao);
+    const botao = document.createElement('button');
+    botao.type = 'button';
+    botao.className = 'btn-lancar-item';
+    botao.textContent = '+';
+    botao.title = `Lançar ${item.nome}`;
+    botao.setAttribute('aria-label', `Lançar ${item.nome}`);
+    botao.addEventListener('click', () => lancarItem(item));
+
+    li.addEventListener('click', (ev) => {
+        if (ev.target === botao) {
+            return;
+        }
+        boxCardapio.ativo = opcoesNavegaveis().indexOf(li);
+        marcarAtivo();
+        elBox('[data-busca]').focus();
+    });
+
+    li.append(nome, preco, botao);
     return li;
 }
 
-// Enter na busca: 1 resultado -> escolhe; nenhum nome igual -> abre "criar"
+// Enter na busca: lanca o escolhido; se o escolhido for "Criar item", ou
+// se nao houver resultado, abre o cadastro.
 function enterNaBusca() {
-    const filtrados = itensFiltrados();
-    if (filtrados.length === 1) {
-        const botao = elBox(`.cardapio-item[data-id-item="${filtrados[0].ID}"]`);
-        selecionarItemCardapio(filtrados[0], botao);
-    } else if (podeCriarItem()) {
+    const filtrados = itensEmOrdem();
+    const ativo = boxCardapio.ativo;
+    if (ativo >= 0 && ativo < filtrados.length) {
+        lancarItem(filtrados[ativo]);
+    } else if (podeCriarItem() && (ativo === filtrados.length || filtrados.length === 0)) {
         abrirCriarItem();
     }
 }
 
-// PROXIMO PASSO: lancar o item na comanda, ex. POST /comanda/<id>/adicionar
-// -> adicionarItemComanda(id_comanda, quant, id_item, preco), recarregar os
-// itens do card e fechar o box. Por enquanto so marca o escolhido.
-function selecionarItemCardapio(item, botao) {
-    boxCardapio.dialog.querySelectorAll('.cardapio-item.is-selecionado')
-        .forEach((b) => b.classList.remove('is-selecionado'));
-    if (botao) {
-        botao.classList.add('is-selecionado');
+// Lanca 1 unidade do item na comanda (preco do cardapio; da para mudar
+// quantidade e preco depois, no proprio card). O box continua aberto para
+// lancar o proximo: Esc fecha.
+async function lancarItem(item) {
+    const card = boxCardapio.card;
+    if (!card || boxCardapio.lancando) {
+        return;
     }
-    console.info('Item escolhido para a comanda', boxCardapio.card?.dataset.comandaId, item);
+    boxCardapio.lancando = true;
+    try {
+        const resposta = await naFila(() => fetch(`/comanda/${card.dataset.comandaId}/adicionar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_item: item.ID, quantidade: 1, preco_unitario: Number(item.preco) }),
+        }));
+        const corpo = await resposta.json().catch(() => ({}));
+        if (!resposta.ok) {
+            throw new Error(corpo.erro || `HTTP ${resposta.status}`);
+        }
+
+        const busca = elBox('[data-busca]');
+        busca.value = '';
+        fecharCriarItem();
+        renderCardapio({ manterStatus: true });
+        mostrarStatusCardapio(`✓ ${item.nome} lançado em ${nomeDoCard(card)}`, 'ok');
+        busca.focus();
+
+        recarregarItensCard(card);
+    } catch (erro) {
+        console.error('Falha ao lancar item', item, erro);
+        mostrarStatusCardapio(`Não foi possível lançar ${item.nome}: ${erro.message}`, 'erro');
+    } finally {
+        boxCardapio.lancando = false;
+    }
+}
+
+// Recarrega a lista do card. Antes grava o que estiver pendente nele, senao
+// a recarga apagaria a edicao. Se algo nao gravar (campo em vermelho), nao
+// recarrega: o item novo aparece quando o card for recarregado depois.
+async function recarregarItensCard(card) {
+    const sujas = Array.from(card.querySelectorAll('.mesa-item.item-sujo'));
+    const resultados = await Promise.all(sujas.map((li) => salvarItem(li)));
+    if (resultados.includes(false)) {
+        return;
+    }
+    card.dataset.itensCarregados = 'false';
+    if (card.open) {
+        enfileirarCarregamento(card);
+    }
 }
 
 function abrirCriarItem() {
@@ -849,39 +1004,24 @@ function fecharCriarItem() {
     elBox('[data-criar-form]').hidden = true;
 }
 
+// Cadastra o item digitado na busca e ja lanca na comanda.
 async function criarItemCardapio() {
     const form = elBox('[data-criar-form]');
     const erro = elBox('[data-criar-erro]');
     if (!form.reportValidity()) {
         return;
     }
-    const nome = elBox('[data-busca]').value.trim();
-
     const botao = form.querySelector('button[type="submit"]');
     botao.disabled = true;
     erro.hidden = true;
     try {
-        const resposta = await naFila(() => fetch('/cardapio/itens', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                nome,
-                categoria: form.elements.categoria.value.trim(),
-                preco: Number(form.elements.preco.value),
-            }),
-        }));
-        const corpo = await resposta.json().catch(() => ({}));
-        if (!resposta.ok) {
-            throw new Error(corpo.erro || `HTTP ${resposta.status}`);
-        }
-
-        boxCardapio.itens.push(corpo);
-        fecharCriarItem();
-        elBox('[data-busca]').value = corpo.nome;
-        renderCardapio();
-        const linha = elBox(`.cardapio-item[data-id-item="${corpo.ID}"]`);
-        selecionarItemCardapio(corpo, linha);
-        linha?.focus();
+        const item = await cadastrarItem(
+            elBox('[data-busca]').value.trim(),
+            form.elements.categoria.value.trim(),
+            Number(form.elements.preco.value),
+        );
+        boxCardapio.itens.push(item);
+        await lancarItem(item);
     } catch (e) {
         console.error('Falha ao criar item', e);
         erro.textContent = `Não foi possível criar: ${e.message}`;
@@ -889,4 +1029,320 @@ async function criarItemCardapio() {
     } finally {
         botao.disabled = false;
     }
+}
+
+// ---------------------------------------------------------------------
+// Box "Novo item" (menu da engrenagem): cadastra no cardapio, sem comanda.
+// Enter em qualquer campo confirma; o box fica aberto para o proximo.
+// ---------------------------------------------------------------------
+
+const boxNovoItem = { dialog: null, nomes: [] };
+
+function iniciarBoxNovoItem() {
+    const dialog = document.querySelector('[data-box-novo-item]');
+    if (!dialog) {
+        return;
+    }
+    boxNovoItem.dialog = dialog;
+    const form = dialog.querySelector('[data-novo-item-form]');
+
+    form.addEventListener('submit', (ev) => {
+        ev.preventDefault();
+        enviarNovoItem(form);
+    });
+    dialog.querySelectorAll('[data-fechar-novo-item]').forEach((b) =>
+        b.addEventListener('click', () => dialog.close()));
+    dialog.addEventListener('click', (ev) => {
+        if (ev.target === dialog) {
+            dialog.close();
+        }
+    });
+    form.elements.nome.addEventListener('input', () => form.elements.nome.setCustomValidity(''));
+}
+
+function statusNovoItem(texto, tipo = '') {
+    const status = boxNovoItem.dialog.querySelector('[data-novo-item-status]');
+    status.textContent = texto;
+    status.classList.toggle('is-erro', tipo === 'erro');
+    status.classList.toggle('is-ok', tipo === 'ok');
+    status.hidden = !texto;
+}
+
+async function abrirBoxNovoItem() {
+    const { dialog } = boxNovoItem;
+    if (!dialog) {
+        return;
+    }
+    const form = dialog.querySelector('[data-novo-item-form]');
+    form.reset();
+    statusNovoItem('');
+    dialog.showModal();
+    form.elements.nome.focus();
+
+    // Categorias ja usadas viram sugestao; nomes servem para avisar repetido.
+    try {
+        const itens = await buscarCardapio();
+        boxNovoItem.nomes = itens.map((i) => normalizar(i.nome));
+        const lista = dialog.querySelector('#categorias-cardapio');
+        lista.innerHTML = '';
+        [...new Set(itens.map((i) => i.categoria).filter(Boolean))].sort().forEach((cat) => {
+            const opcao = document.createElement('option');
+            opcao.value = cat;
+            lista.appendChild(opcao);
+        });
+    } catch (erro) {
+        console.error('Falha ao carregar cardapio', erro);
+    }
+}
+
+async function enviarNovoItem(form) {
+    const nome = form.elements.nome.value.trim();
+    if (boxNovoItem.nomes.includes(normalizar(nome))) {
+        form.elements.nome.setCustomValidity('Já existe um item com esse nome.');
+    }
+    if (!form.reportValidity()) {
+        return;
+    }
+    const botao = form.querySelector('button[type="submit"]');
+    botao.disabled = true;
+    try {
+        const item = await cadastrarItem(
+            nome,
+            form.elements.categoria.value.trim(),
+            Number(form.elements.preco.value),
+        );
+        boxNovoItem.nomes.push(normalizar(item.nome));
+        statusNovoItem(`✓ ${item.nome} cadastrado (${formatarPreco(item.preco)})`, 'ok');
+        const categoria = form.elements.categoria.value;
+        form.reset();
+        form.elements.categoria.value = categoria; // costuma cadastrar varios da mesma categoria
+        form.elements.nome.focus();
+    } catch (erro) {
+        console.error('Falha ao cadastrar item', erro);
+        statusNovoItem(`Não foi possível cadastrar: ${erro.message}`, 'erro');
+    } finally {
+        botao.disabled = false;
+    }
+}
+
+// ---------------------------------------------------------------------
+// Arrastar cards para mudar a ordem (mouse e toque, via pointer events;
+// o drag and drop nativo do HTML nao funciona com toque).
+// Teclado: foco na alca + setas. A ordem vai para POST /comandas/ordem.
+// ---------------------------------------------------------------------
+
+const MARGEM_AUTOSCROLL = 70; // px da borda da janela onde a pagina rola sozinha
+
+let arrasto = null; // estado do arrasto em andamento
+
+function iniciarArrastarCard(card) {
+    const alca = card.querySelector('[data-arrastar]');
+    if (!alca) {
+        return;
+    }
+    // dentro do <summary>: clicar na alca nao abre/fecha o card
+    alca.addEventListener('click', (ev) => ev.preventDefault());
+    alca.addEventListener('pointerdown', (ev) => comecarArrasto(ev, card, alca));
+    alca.addEventListener('keydown', (ev) => {
+        const passos = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 };
+        if (ev.key in passos) {
+            ev.preventDefault();
+            moverCardTeclado(card, passos[ev.key]);
+        }
+    });
+}
+
+function gridComandas() {
+    return document.querySelector('.comandas-grid');
+}
+
+function ordemAtual() {
+    return Array.from(gridComandas().querySelectorAll('.mesa-card'))
+        .map((c) => c.dataset.comandaId).join(',');
+}
+
+function comecarArrasto(ev, card, alca) {
+    if (ev.button !== 0 || arrasto) {
+        return;
+    }
+    ev.preventDefault();
+
+    const ret = card.getBoundingClientRect();
+    const espaco = document.createElement('div');
+    espaco.className = 'mesa-card-espaco';
+    espaco.style.height = `${ret.height}px`;
+    card.before(espaco);
+
+    arrasto = {
+        card,
+        alca,
+        espaco,
+        dx: ev.clientX - ret.left,
+        dy: ev.clientY - ret.top,
+        ordemAntes: ordemAtual(),
+        x: ev.clientX,
+        y: ev.clientY,
+        rolagem: null,
+    };
+
+    // o card sai do grid e segue o ponteiro; o "espaco" guarda o lugar dele
+    card.classList.add('is-arrastando');
+    card.style.width = `${ret.width}px`;
+    posicionarCardArrastado();
+
+    alca.setPointerCapture(ev.pointerId);
+    alca.addEventListener('pointermove', moverArrasto);
+    alca.addEventListener('pointerup', terminarArrasto);
+    alca.addEventListener('pointercancel', terminarArrasto);
+    arrasto.rolagem = setInterval(rolarPertoDaBorda, 16);
+}
+
+function posicionarCardArrastado() {
+    const { card, dx, dy, x, y } = arrasto;
+    card.style.left = `${x - dx}px`;
+    card.style.top = `${y - dy}px`;
+}
+
+function moverArrasto(ev) {
+    if (!arrasto) {
+        return;
+    }
+    arrasto.x = ev.clientX;
+    arrasto.y = ev.clientY;
+    posicionarCardArrastado();
+    reposicionarEspaco();
+}
+
+// Coloca o "espaco" antes ou depois do card que esta sob o ponteiro.
+function reposicionarEspaco() {
+    const { card, espaco, x, y } = arrasto;
+    const sob = document.elementFromPoint(x, y);
+    if (!sob) {
+        return;
+    }
+    const grid = gridComandas();
+
+    // em cima do "+ Nova comanda": vai para o fim (ele e sempre o ultimo)
+    const nova = sob.closest('.nova-comanda-card');
+    if (nova && grid.contains(nova)) {
+        if (espaco.nextElementSibling !== nova) {
+            nova.before(espaco);
+        }
+        return;
+    }
+
+    const alvo = sob.closest('.mesa-card');
+    if (!alvo || alvo === card || !grid.contains(alvo)) {
+        return;
+    }
+    const r = alvo.getBoundingClientRect();
+    // uma coluna (tela estreita): decide pela altura; varias: pela largura
+    const umaColuna = getComputedStyle(grid).gridTemplateColumns.split(' ').length === 1;
+    const antes = umaColuna ? y < r.top + r.height / 2 : x < r.left + r.width / 2;
+    if (antes && espaco.nextElementSibling !== alvo) {
+        alvo.before(espaco);
+    } else if (!antes && alvo.nextElementSibling !== espaco) {
+        alvo.after(espaco);
+    }
+}
+
+// Com o ponteiro parado perto do topo/rodape da janela, a pagina rola.
+function rolarPertoDaBorda() {
+    if (!arrasto) {
+        return;
+    }
+    const { y } = arrasto;
+    let passo = 0;
+    if (y < MARGEM_AUTOSCROLL) {
+        passo = -Math.ceil((MARGEM_AUTOSCROLL - y) / 6);
+    } else if (y > window.innerHeight - MARGEM_AUTOSCROLL) {
+        passo = Math.ceil((y - (window.innerHeight - MARGEM_AUTOSCROLL)) / 6);
+    }
+    if (passo) {
+        window.scrollBy(0, passo);
+        reposicionarEspaco();
+    }
+}
+
+function terminarArrasto() {
+    if (!arrasto) {
+        return;
+    }
+    const { card, alca, espaco, ordemAntes, rolagem } = arrasto;
+    clearInterval(rolagem);
+    alca.removeEventListener('pointermove', moverArrasto);
+    alca.removeEventListener('pointerup', terminarArrasto);
+    alca.removeEventListener('pointercancel', terminarArrasto);
+
+    espaco.replaceWith(card);
+    card.classList.remove('is-arrastando');
+    card.style.removeProperty('width');
+    card.style.removeProperty('left');
+    card.style.removeProperty('top');
+    arrasto = null;
+
+    if (ordemAtual() !== ordemAntes) {
+        salvarOrdemCards();
+    }
+}
+
+function moverCardTeclado(card, passo) {
+    const cards = Array.from(gridComandas().querySelectorAll('.mesa-card'));
+    const i = cards.indexOf(card);
+    const destino = cards[i + passo];
+    if (!destino) {
+        return;
+    }
+    if (passo < 0) {
+        destino.before(card);
+    } else {
+        destino.after(card);
+    }
+    card.querySelector('[data-arrastar]').focus();
+    salvarOrdemCards();
+}
+
+// Varios movimentos seguidos (setas) viram uma gravacao so.
+let timerOrdem = null;
+
+function salvarOrdemCards() {
+    clearTimeout(timerOrdem);
+    timerOrdem = setTimeout(enviarOrdemCards, 400);
+}
+
+async function enviarOrdemCards() {
+    const ids = Array.from(gridComandas().querySelectorAll('.mesa-card'))
+        .map((c) => Number(c.dataset.comandaId));
+    if (ids.length === 0) {
+        return;
+    }
+    try {
+        const resposta = await naFila(() => fetch('/comandas/ordem', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids }),
+        }));
+        const corpo = await resposta.json().catch(() => ({}));
+        if (!resposta.ok) {
+            throw new Error(corpo.erro || `HTTP ${resposta.status}`);
+        }
+    } catch (erro) {
+        console.error('Falha ao salvar a ordem das comandas', erro);
+        avisar(`A nova ordem não foi salva: ${erro.message}`);
+    }
+}
+
+// Aviso curto no canto da tela (some sozinho).
+function avisar(texto) {
+    let aviso = document.querySelector('.aviso-flutuante');
+    if (!aviso) {
+        aviso = document.createElement('div');
+        aviso.className = 'aviso-flutuante';
+        aviso.setAttribute('role', 'status');
+        document.body.appendChild(aviso);
+    }
+    aviso.textContent = texto;
+    aviso.classList.add('is-visivel');
+    clearTimeout(avisar.timer);
+    avisar.timer = setTimeout(() => aviso.classList.remove('is-visivel'), 4000);
 }

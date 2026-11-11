@@ -680,6 +680,16 @@ h1, h2, h3 {
     color: var(--danger);
 }
 
+.box-cardapio-status.is-ok {
+    color: var(--gold);
+}
+
+.box-cardapio-dica {
+    margin: -4px 0 0;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+}
+
 .cardapio-lista {
     flex: 1;
     min-height: 0;
@@ -694,30 +704,36 @@ h1, h2, h3 {
     display: none;
 }
 
-.cardapio-item {
-    width: 100%;
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    padding: 9px 10px;
-    border: none;
+.cardapio-categoria {
+    position: sticky; /* titulo fica no topo enquanto rola a categoria */
+    top: 0;
+    z-index: 1;
+    padding: 10px 10px 4px;
+    background: var(--card-bg);
     border-bottom: 1px solid var(--border);
-    background: none;
-    color: var(--text);
-    font: inherit;
+    font-family: 'Bebas Neue', 'Inter', sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.06em;
+    color: var(--copper);
+}
+
+.cardapio-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 6px 6px 14px;
+    border-bottom: 1px solid var(--border);
     font-size: 0.9rem;
-    text-align: left;
-    cursor: pointer;
+    cursor: default;
+    scroll-margin-top: 34px; /* setas: o item nao some atras do titulo fixo */
 }
 
 .cardapio-item:hover,
-.cardapio-item:focus-visible {
+.cardapio-item.is-ativo {
     background: var(--card-header-bg);
-    outline: none;
 }
 
-.cardapio-item.is-selecionado {
-    background: rgba(212, 175, 55, 0.12);
+.cardapio-item.is-ativo {
     box-shadow: inset 2px 0 0 var(--gold);
 }
 
@@ -729,14 +745,32 @@ h1, h2, h3 {
     text-overflow: ellipsis;
 }
 
-.cardapio-item-categoria {
+.cardapio-item-preco {
     color: var(--text-muted);
-    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
 }
 
-.cardapio-item-preco {
+.btn-lancar-item {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid var(--copper);
+    border-radius: 50%;
+    background: none;
     color: var(--copper);
-    font-variant-numeric: tabular-nums;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.btn-lancar-item:hover,
+.cardapio-item.is-ativo .btn-lancar-item {
+    background: var(--copper);
+    color: var(--bg);
 }
 
 .btn-criar-item {
@@ -755,7 +789,8 @@ h1, h2, h3 {
     white-space: nowrap;
 }
 
-.btn-criar-item:hover {
+.btn-criar-item:hover,
+.btn-criar-item.is-ativo {
     border-style: solid;
     color: var(--gold);
 }
@@ -794,4 +829,106 @@ h1, h2, h3 {
 .criar-item-form input[type="number"] {
     -moz-appearance: textfield;
     appearance: textfield;
+}
+
+/* ---------- Box "Novo item" (menu) ---------- */
+
+.box-novo-item .form-row {
+    margin: 0;
+}
+
+.box-novo-item .form-row input {
+    font: inherit;
+}
+
+.box-novo-item .form-row input:focus {
+    outline: none;
+    border-color: var(--copper);
+}
+
+.box-novo-item input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* ---------- Arrastar cards ---------- */
+
+.btn-arrastar-card {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    width: 20px;
+    height: 24px;
+    padding: 0;
+    flex-shrink: 0;
+    border: none;
+    border-radius: var(--radius);
+    background: none;
+    color: var(--text-muted);
+    cursor: grab;
+    touch-action: none; /* no toque, arrastar a alca nao rola a pagina */
+}
+
+.btn-arrastar-card:hover,
+.btn-arrastar-card:focus-visible {
+    color: var(--copper);
+    outline: none;
+}
+
+.btn-arrastar-card:focus-visible {
+    box-shadow: 0 0 0 1px var(--copper);
+}
+
+/* card solto, seguindo o ponteiro */
+.mesa-card.is-arrastando {
+    position: fixed;
+    z-index: 200;
+    margin: 0;
+    pointer-events: none; /* deixa o elementFromPoint achar o card de baixo */
+    opacity: 0.92;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6);
+    transform: rotate(1deg);
+}
+
+.mesa-card.is-arrastando .btn-arrastar-card {
+    cursor: grabbing;
+}
+
+/* lugar onde o card vai cair */
+.mesa-card-espaco {
+    border: 1px dashed var(--copper);
+    border-radius: var(--radius);
+    background: rgba(193, 121, 63, 0.06);
+}
+
+.aviso-flutuante {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    z-index: 300;
+    max-width: calc(100vw - 32px);
+    padding: 10px 16px;
+    border: 1px solid var(--danger);
+    border-radius: 6px;
+    background: var(--card-header-bg);
+    color: var(--text);
+    font-size: 0.85rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    transform: translate(-50%, 12px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, transform 0.2s, visibility 0s linear 0.2s;
+}
+
+.aviso-flutuante.is-visivel {
+    transform: translate(-50%, 0);
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.2s, transform 0.2s, visibility 0s;
+}
+
+body:has(.mesa-card.is-arrastando) {
+    cursor: grabbing;
+    user-select: none;
 }

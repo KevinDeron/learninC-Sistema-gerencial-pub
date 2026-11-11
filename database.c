@@ -2,10 +2,8 @@
 #include <sqlite3.h>
 
 sqlite3 *db;
-sqlite3_stmt *stmt;
 int rc;
 char *zErrMsg;
-char *sql;
 
 static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
    for(int i = 0; i<argc; i++) {
@@ -18,6 +16,7 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
 void liberarString(void *p){ sqlite3_free(p); }
 
 int initDB(){
+    const char *sql = NULL;
     zErrMsg = NULL;
     rc = sqlite3_open("data.db",&db);
     if(rc){
